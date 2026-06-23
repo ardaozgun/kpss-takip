@@ -1,19 +1,29 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPSS Takip</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#08070f;--surface:#111019;--surface2:#18162a;--surface3:#1f1d30;--border:#2a2640;--border2:#362f55;--purple:#8b5cf6;--purple2:#7c3aed;--purple-light:#a78bfa;--text:#f0eeff;--muted:#7b7899;--muted2:#4a4768;--green:#10b981;--red:#f43f5e;--gold:#f59e0b}
+:root{
+  --bg:#08070f;--surface:#111019;--surface2:#18162a;--surface3:#1f1d30;
+  --border:#2a2640;--border2:#362f55;
+  --purple:#8b5cf6;--purple2:#7c3aed;--purple-light:#a78bfa;
+  --text:#f0eeff;--muted:#7b7899;--muted2:#4a4768;
+  --green:#10b981;--red:#f43f5e;--gold:#f59e0b;--blue:#3b82f6;
+}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
 #loginScreen::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none}
+#loginScreen::after{content:'';position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,.06) 0%,transparent 70%);bottom:0;left:0;pointer-events:none}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:44px 40px;width:400px;max-width:92vw;position:relative;z-index:1}
-.login-logo{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
+.login-logo{font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
 .login-title{font-size:26px;font-weight:600;margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.5}
 .login-field{margin-bottom:14px}
@@ -22,7 +32,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .login-field input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.1)}
 .login-btn{width:100%;background:var(--purple2);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;margin-top:6px}
 .login-btn:hover{background:#6d28d9}
+.login-btn:active{transform:scale(.98)}
 .login-error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#fb7185;margin-top:10px;display:none}
+
+/* APP */
 #appScreen{display:none;min-height:100vh;flex-direction:row}
 #appScreen.show{display:flex}
 .sidebar{width:230px;min-width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10}
@@ -34,21 +47,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .sb-nav-item:hover{color:var(--text);background:rgba(139,92,246,.06)}
 .sb-nav-item.active{color:var(--text);background:rgba(139,92,246,.1);border-left-color:var(--purple)}
 .sb-nav-icon{font-size:16px;width:20px;text-align:center}
+.sb-divider{margin:6px 20px;height:1px;background:var(--border)}
 .sb-bottom{padding:16px 20px;border-top:1px solid var(--border)}
-.sb-user{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sb-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .sb-avatar{width:32px;height:32px;border-radius:50%;background:rgba(139,92,246,.2);color:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
 .sb-username{font-size:13px;font-weight:500}
 .sb-logout{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;padding:0;transition:.15s}
 .sb-logout:hover{color:var(--red)}
+.sb-progress{margin-top:12px}
 .sb-prog-label{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
 .sb-prog-bar{height:4px;background:var(--surface3);border-radius:2px}
 .sb-prog-fill{height:100%;background:var(--purple);border-radius:2px;transition:.5s}
+
+/* MAIN */
 .main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:15px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
 .topbar-title{font-size:15px;font-weight:500}
 .topbar-badge{background:rgba(139,92,246,.12);color:var(--purple-light);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:500}
 .content{padding:24px 28px;flex:1}
+
+/* PAGES */
 .page{display:none}.page.active{display:block}
+
+/* FOLDERS */
 .folder{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;transition:.2s}
 .folder:hover{border-color:var(--border2)}
 .folder-hdr{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none}
@@ -68,10 +89,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .vitem:hover{background:rgba(255,255,255,.015)}
 .vcheck{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:.2s;cursor:pointer}
 .vcheck.done{background:var(--purple2);border-color:var(--purple2);color:#fff}
-.vname{font-size:13px;flex:1;line-height:1.4}
+.vname{font-size:13px;flex:1;line-height:1.4;color:var(--text)}
 .vname.done{text-decoration:line-through;color:var(--muted)}
 .vlink{font-size:11px;color:var(--purple-light);text-decoration:none;padding:4px 9px;border-radius:6px;background:rgba(139,92,246,.1);white-space:nowrap;flex-shrink:0;transition:.15s}
 .vlink:hover{background:rgba(139,92,246,.2)}
+
+/* NET HESAP */
 .sec-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
 .dform{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px}
 .dform-top{display:flex;gap:12px;margin-bottom:20px;align-items:center}
@@ -83,7 +106,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ntable th:first-child{text-align:left;padding-left:0}
 .ntable td{padding:6px 8px}
 .ntable td:first-child{padding-left:0}
-.nlabel{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;padding:6px 0}
+.nlabel{font-size:13px;font-weight:500;padding:8px 0;display:flex;align-items:center;gap:8px}
 .ninp{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 6px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;font-weight:500;text-align:center;outline:none;transition:.2s}
 .ninp:focus{border-color:var(--purple)}
 .nres{font-size:15px;font-weight:600;color:var(--purple-light);text-align:center}
@@ -93,11 +116,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .puan-val{font-size:22px;font-weight:600;color:var(--purple-light)}
 .btn-kaydet{background:var(--purple2);color:#fff;border:none;border-radius:9px;padding:11px 24px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;margin-top:14px}
 .btn-kaydet:hover{background:#6d28d9}
+.btn-kaydet:active{transform:scale(.98)}
+
+/* GEÇMİŞ */
 .glist{display:flex;flex-direction:column;gap:8px}
 .gitem{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 18px;display:flex;align-items:center;gap:16px;transition:.2s}
 .gitem:hover{border-color:var(--border2)}
 .gitem-info{flex:1}
-.gitem-ad{font-size:14px;font-weight:500;margin-bottom:3px}
+.gitem-ad{font-size:14px;font-weight:500;margin-bottom:4px}
 .gitem-tarih{font-size:11px;color:var(--muted)}
 .gitem-dersler{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .gitem-ders{font-size:11px;color:var(--muted);background:var(--surface2);border-radius:5px;padding:3px 8px}
@@ -108,6 +134,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .btn-sil{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;padding:4px;transition:.15s}
 .btn-sil:hover{color:var(--red)}
 .empty{text-align:center;padding:50px 20px;color:var(--muted);font-size:14px;line-height:1.8}
+
+/* ANALİZ */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
 .scard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
 .scard-val{font-size:24px;font-weight:600;margin-bottom:4px}
@@ -119,8 +147,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .arow-val{font-size:13px;font-weight:500}
 .abar{height:3px;background:var(--surface3);border-radius:2px;margin-bottom:10px}
 .abar-fill{height:100%;border-radius:2px;transition:.6s}
+
+/* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--purple);border-radius:11px;padding:13px 18px;font-size:13px;display:flex;align-items:center;gap:9px;z-index:999;animation:tin .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.5)}
 @keyframes tin{from{opacity:0;transform:translateX(70px)}to{opacity:1;transform:translateX(0)}}
+.toast-icon{color:var(--purple-light)}
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);font-size:14px;gap:10px}
 .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -129,6 +160,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">2026 KPSS</div>
@@ -147,6 +179,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
   </div>
 </div>
 
+<!-- APP -->
 <div id="appScreen">
   <div class="sidebar">
     <div class="sb-logo">
@@ -167,8 +200,13 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
           <button class="sb-logout" onclick="doLogout()">Çıkış Yap</button>
         </div>
       </div>
-      <div class="sb-prog-label"><span>Genel İlerleme</span><span id="sbProgText" style="color:var(--purple-light)">0%</span></div>
-      <div class="sb-prog-bar"><div class="sb-prog-fill" id="sbProgFill" style="width:0%"></div></div>
+      <div class="sb-progress">
+        <div class="sb-prog-label">
+          <span>Genel İlerleme</span>
+          <span id="sbProgText" style="color:var(--purple-light)">0%</span>
+        </div>
+        <div class="sb-prog-bar"><div class="sb-prog-fill" id="sbProgFill" style="width:0%"></div></div>
+      </div>
     </div>
   </div>
 
@@ -178,7 +216,13 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
       <div class="topbar-badge" id="topbarBadge"></div>
     </div>
     <div class="content">
-      <div class="page active" id="page-video"><div id="videoContent"><div class="loading"><div class="spin"></div>Yükleniyor...</div></div></div>
+
+      <!-- VİDEO SAYFASI -->
+      <div class="page active" id="page-video">
+        <div id="videoContent"><div class="loading"><div class="spin"></div>Yükleniyor...</div></div>
+      </div>
+
+      <!-- NET HESAP -->
       <div class="page" id="page-net">
         <div class="sec-title">Yeni Deneme Ekle</div>
         <div class="dform">
@@ -187,9 +231,16 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
             <input class="dname-inp" id="deneAd" placeholder="Örn: Deneme 1, Mart Denemesi...">
           </div>
           <table class="ntable">
-            <thead><tr><th style="text-align:left">Ders</th><th>Doğru</th><th>Yanlış</th><th>Net</th></tr></thead>
+            <thead><tr>
+              <th style="text-align:left">Ders</th>
+              <th>Doğru</th><th>Yanlış</th><th>Net</th>
+            </tr></thead>
             <tbody id="netBody"></tbody>
-            <tfoot><tr class="ntotal"><td><span style="font-size:13px;font-weight:600">Toplam</span></td><td></td><td></td><td class="nres" id="topNet">—</td></tr></tfoot>
+            <tfoot><tr class="ntotal">
+              <td><span style="font-size:13px;font-weight:600">Toplam</span></td>
+              <td></td><td></td>
+              <td class="nres" id="topNet">—</td>
+            </tr></tfoot>
           </table>
           <div class="puan-box">
             <div class="puan-label">Tahmini KPSS-P10 Puanı</div>
@@ -198,59 +249,73 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
           <button class="btn-kaydet" onclick="deneKaydet()">✓ Denemeyi Kaydet</button>
         </div>
       </div>
+
+      <!-- GEÇMİŞ -->
       <div class="page" id="page-gecmis">
         <div class="sec-title">Deneme Geçmişi</div>
         <div class="glist" id="gecmisList"></div>
       </div>
+
+      <!-- ANALİZ -->
       <div class="page" id="page-analiz">
         <div class="sec-title">Performans Analizi</div>
         <div class="stat-grid" id="analizStats"></div>
         <div id="analizCards"></div>
       </div>
+
     </div>
   </div>
 </div>
 
 <script>
-const SUPA_URL='https://rovzbxstktopuewlyobo.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdnpieHN0a3RvcHVld2x5b2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjMxODMsImV4cCI6MjA5NzczOTE4M30.6mm2V4H4sNTEeRacV-sTygesF3VV0Q1GG68lYwAzsYg';
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
-const SIFRE='1234';
-let currentUser=null,progressCache={},denemelerCache=[],currentPage='video';
+const SUPA_URL = 'https://rovzbxstktopuewlyobo.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdnpieHN0a3RvcHVld2x5b2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjMxODMsImV4cCI6MjA5NzczOTE4M30.6mm2V4H4sNTEeRacV-sTygesF3VV0Q1GG68lYwAzsYg';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-const DERSLER=[
-  {id:'turkce',ad:'Türkçe',icon:'📖',renk:'#8b5cf6',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn',soru:30},
-  {id:'matematik',ad:'Matematik',icon:'📐',renk:'#ef4444',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1',soru:30},
-  {id:'tarih',ad:'Tarih',icon:'🏛️',renk:'#f59e0b',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF',soru:15},
-  {id:'cografya',ad:'Coğrafya',icon:'🌍',renk:'#10b981',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK',soru:10},
-  {id:'vatandaslik',ad:'Vatandaşlık',icon:'⚖️',renk:'#3b82f6',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE',soru:15},
+const SIFRE = '1234';
+let currentUser = null;
+let progressCache = {};
+let denemelerCache = [];
+
+const DERSLER = [
+  {id:'turkce', ad:'Türkçe', icon:'📖', renk:'#8b5cf6', list:'PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn', videoSayisi:46, soru:30},
+  {id:'matematik', ad:'Matematik', icon:'📐', renk:'#ef4444', list:'PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1', videoSayisi:81, soru:30},
+  {id:'tarih', ad:'Tarih', icon:'🏛️', renk:'#f59e0b', list:'PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF', videoSayisi:60, soru:15},
+  {id:'cografya', ad:'Coğrafya', icon:'🌍', renk:'#10b981', list:'PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK', videoSayisi:34, soru:10},
+  {id:'vatandaslik', ad:'Vatandaşlık', icon:'⚖️', renk:'#3b82f6', list:'PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE', videoSayisi:48, soru:15},
 ];
 
-const AGIRLIKLAR={turkce:0.3,matematik:0.3,tarih:0.125,cografya:0.0833,vatandaslik:0.125};
-
-function hesaplaKPSSPuan(netler){
-  let t=0;
-  Object.entries(netler).forEach(([id,net])=>{if(AGIRLIKLAR[id])t+=net*AGIRLIKLAR[id]});
-  return Math.max(0,70+t*2.5).toFixed(2);
+// KPSS-P10 ağırlıkları (toplam 120 soru: 60 GY + 60 GK)
+// GY: Türkçe 30 + Matematik 30
+// GK: Tarih 15 + Coğrafya 10 + Vatandaşlık 15 + Din 10 + Yabancı Dil 10
+function hesaplaKPSSPuan(netler) {
+  const toplam = Object.values(netler).reduce((a,b)=>a+b,0);
+  return Math.max(0, 50 + toplam * 0.65).toFixed(2);
 }
 
-async function doLogin(){
-  const user=document.getElementById('loginUser').value.trim().toLowerCase();
-  const pass=document.getElementById('loginPass').value;
-  const err=document.getElementById('loginErr');
+// ── LOGIN ──
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
   if(!user){err.textContent='Kullanıcı adı gir!';err.style.display='block';return}
-  if(pass!==SIFRE){err.style.display='block';err.textContent='Şifre yanlış!';return}
+  if(pass !== SIFRE){err.style.display='block';err.textContent='Şifre yanlış!';return}
   err.style.display='none';
-  const {data:ex}=await sb.from('kpss_users').select('username').eq('username',user).single();
-  if(!ex)await sb.from('kpss_users').insert({username:user});
-  currentUser=user;
-  localStorage.setItem('kpss_user',user);
+  // Kullanıcıyı kaydet/bul
+  const {data:existing} = await sb.from('kpss_users').select('username').eq('username',user).single();
+  if(!existing){
+    await sb.from('kpss_users').insert({username:user});
+  }
+  currentUser = user;
+  localStorage.setItem('kpss_user', user);
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appScreen').classList.add('show');
-  document.getElementById('sbUsername').textContent=user;
-  document.getElementById('sbAvatar').textContent=user[0].toUpperCase();
+  document.getElementById('sbUsername').textContent = user;
+  document.getElementById('sbAvatar').textContent = user[0].toUpperCase();
   await loadProgress();
-  renderVideo();renderNetTable();updateBadge();
+  renderVideo();
+  renderNetTable();
+  updateBadge();
 }
 
 function doLogout(){
@@ -262,67 +327,119 @@ function doLogout(){
   document.getElementById('loginPass').value='';
 }
 
+// ── PROGRESS ──
 async function loadProgress(){
-  const {data}=await sb.from('kpss_progress').select('video_id,completed').eq('username',currentUser);
+  const {data} = await sb.from('kpss_progress').select('video_id,completed').eq('username',currentUser);
   progressCache={};
-  if(data)data.forEach(r=>{if(r.completed)progressCache[r.video_id]=true});
-  const {data:d2}=await sb.from('kpss_denemeler').select('*').eq('username',currentUser).order('created_at',{ascending:false});
-  denemelerCache=d2||[];
+  if(data) data.forEach(r=>{if(r.completed)progressCache[r.video_id]=true});
+  const {data:d2} = await sb.from('kpss_denemeler').select('*').eq('username',currentUser).order('created_at',{ascending:false});
+  denemelerCache = d2||[];
 }
 
-async function toggleVideo(vid,plid){
-  const done=!progressCache[vid];
-  if(done){progressCache[vid]=true;await sb.from('kpss_progress').upsert({username:currentUser,video_id:vid,completed:true},{onConflict:'username,video_id'});showToast('✓ Video tamamlandı!')}
-  else{delete progressCache[vid];await sb.from('kpss_progress').delete().eq('username',currentUser).eq('video_id',vid)}
+async function toggleVideo(vid, plid){
+  const done = !progressCache[vid];
+  if(done){
+    progressCache[vid]=true;
+    await sb.from('kpss_progress').upsert({username:currentUser,video_id:vid,completed:true},{onConflict:'username,video_id'});
+    showToast('✓ Video tamamlandı!');
+  } else {
+    delete progressCache[vid];
+    await sb.from('kpss_progress').delete().eq('username',currentUser).eq('video_id',vid);
+  }
   const chk=document.getElementById('chk_'+vid);
   const nm=document.getElementById('vn_'+vid);
   if(chk&&nm){
     if(done){chk.classList.add('done');chk.textContent='✓';nm.classList.add('done')}
     else{chk.classList.remove('done');chk.textContent='';nm.classList.remove('done')}
   }
-  updateFolderMeta(plid);updateSidebar();updateBadge();
+  updateFolderMeta(plid);
+  updateSidebar();updateBadge();
 }
 
+// ── VİDEO RENDER ──
 function renderVideo(){
-  const wrap=document.getElementById('videoContent');wrap.innerHTML='';
+  const wrap=document.getElementById('videoContent');
+  wrap.innerHTML='';
   DERSLER.forEach(ders=>{
-    const videolar=Array.from({length:30},(_,i)=>({id:ders.id+'_'+i,ad:(i+1)+'. Ders',url:ders.url+'&index='+(i+1)}));
+    const videolar = Array.from({length:ders.videoSayisi},(_,i)=>({
+      id:ders.id+'_'+i,
+      ad:(i+1)+'. Ders',
+      url:'https://www.youtube.com/watch?list='+ders.list+'&index='+(i+1)
+    }));
     const tam=videolar.filter(v=>progressCache[v.id]).length;
     const pct=Math.round(tam/videolar.length*100);
-    const div=document.createElement('div');div.className='folder';div.id='folder_'+ders.id;
-    div.innerHTML=`<div class="folder-hdr" onclick="toggleFolder('${ders.id}')"><div class="folder-icon" style="background:${ders.renk}18">${ders.icon}</div><div class="folder-name">${ders.ad}</div><div class="folder-meta" id="fmeta_${ders.id}">${tam}/${videolar.length} tamamlandı</div><span class="folder-arrow" id="farr_${ders.id}">▾</span></div><div class="folder-prog-wrap"><div class="folder-prog-bar"><div class="folder-prog-fill" id="fprog_${ders.id}" style="width:${pct}%;background:${ders.renk}"></div></div></div><div class="vlist" id="vlist_${ders.id}">${videolar.map(v=>{const done=!!progressCache[v.id];return`<div class="vitem"><div class="vcheck ${done?'done':''}" id="chk_${v.id}" onclick="toggleVideo('${v.id}','${ders.id}')">${done?'✓':''}</div><div class="vname ${done?'done':''}" id="vn_${v.id}">${v.ad}</div><a class="vlink" href="${v.url}" target="_blank">▶ İzle</a></div>`}).join('')}</div>`;
+    const div=document.createElement('div');
+    div.className='folder';div.id='folder_'+ders.id;
+    div.innerHTML=`
+      <div class="folder-hdr" onclick="toggleFolder('${ders.id}')">
+        <div class="folder-icon" style="background:${ders.renk}18">${ders.icon}</div>
+        <div class="folder-name">${ders.ad}</div>
+        <div class="folder-meta" id="fmeta_${ders.id}">${tam}/${videolar.length} tamamlandı</div>
+        <span class="folder-arrow" id="farr_${ders.id}">▾</span>
+      </div>
+      <div class="folder-prog-wrap">
+        <div class="folder-prog-bar"><div class="folder-prog-fill" id="fprog_${ders.id}" style="width:${pct}%;background:${ders.renk}"></div></div>
+      </div>
+      <div class="vlist" id="vlist_${ders.id}">
+        ${videolar.map(v=>{
+          const done=!!progressCache[v.id];
+          return`<div class="vitem">
+            <div class="vcheck ${done?'done':''}" id="chk_${v.id}" onclick="toggleVideo('${v.id}','${ders.id}')">${done?'✓':''}</div>
+            <div class="vname ${done?'done':''}" id="vn_${v.id}">${v.ad}</div>
+            <a class="vlink" href="${v.url}" target="_blank">▶ İzle</a>
+          </div>`;
+        }).join('')}
+      </div>`;
     wrap.appendChild(div);
   });
   updateSidebar();
 }
 
-function toggleFolder(id){document.getElementById('folder_'+id).classList.toggle('open')}
+function toggleFolder(id){
+  document.getElementById('folder_'+id).classList.toggle('open');
+}
 
 function updateFolderMeta(plid){
-  const ders=DERSLER.find(d=>d.id===plid);if(!ders)return;
-  const tam=Array.from({length:30},(_,i)=>progressCache[ders.id+'_'+i]).filter(Boolean).length;
-  const pct=Math.round(tam/30*100);
-  const m=document.getElementById('fmeta_'+plid);const p=document.getElementById('fprog_'+plid);
-  if(m)m.textContent=tam+'/30 tamamlandı';if(p)p.style.width=pct+'%';
+  const ders=DERSLER.find(d=>d.id===plid);
+  if(!ders)return;
+  const tam=Array.from({length:ders.videoSayisi},(_,i)=>progressCache[ders.id+'_'+i]).filter(Boolean).length;
+  const pct=Math.round(tam/ders.videoSayisi*100);
+  const m=document.getElementById('fmeta_'+plid);
+  const p=document.getElementById('fprog_'+plid);
+  if(m)m.textContent=tam+'/'+ders.videoSayisi+' tamamlandı';
+  if(p)p.style.width=pct+'%';
 }
 
 function updateSidebar(){
-  let total=DERSLER.length*30,done=0;
-  DERSLER.forEach(d=>{for(let i=0;i<30;i++)if(progressCache[d.id+'_'+i])done++});
-  const pct=Math.round(done/total*100);
+  let total=0,done=0;
+  DERSLER.forEach(d=>{
+    for(let i=0;i<d.videoSayisi;i++){total++;if(progressCache[d.id+'_'+i])done++}
+  });
+  const pct=total?Math.round(done/total*100):0;
   document.getElementById('sbProgFill').style.width=pct+'%';
   document.getElementById('sbProgText').textContent=pct+'%';
 }
 
 function updateBadge(){
   const badge=document.getElementById('topbarBadge');
-  if(currentPage==='video'){let done=0;DERSLER.forEach(d=>{for(let i=0;i<30;i++)if(progressCache[d.id+'_'+i])done++});badge.textContent=done+' / '+(DERSLER.length*30)+' tamamlandı'}
-  else if(currentPage==='gecmis'||currentPage==='analiz')badge.textContent=denemelerCache.length+' deneme';
-  else badge.textContent='';
+  if(currentPage==='video'){
+    let total=0,done=0;
+    DERSLER.forEach(d=>{for(let i=0;i<d.videoSayisi;i++){total++;if(progressCache[d.id+'_'+i])done++}});
+    badge.textContent=done+' / '+total+' tamamlandı';
+  } else if(currentPage==='gecmis'||currentPage==='analiz'){
+    badge.textContent=denemelerCache.length+' deneme';
+  } else badge.textContent='';
 }
 
+// ── NET HESAP ──
 function renderNetTable(){
-  document.getElementById('netBody').innerHTML=DERSLER.map(d=>`<tr><td><div class="nlabel"><span>${d.icon}</span>${d.ad}<span style="font-size:11px;color:var(--muted);font-weight:400">(${d.soru})</span></div></td><td><input class="ninp" type="number" id="d_${d.id}" min="0" max="${d.soru}" placeholder="0" oninput="hesaplaNet()"></td><td><input class="ninp" type="number" id="y_${d.id}" min="0" max="${d.soru}" placeholder="0" oninput="hesaplaNet()"></td><td class="nres" id="n_${d.id}">—</td></tr>`).join('');
+  document.getElementById('netBody').innerHTML=DERSLER.map(d=>`
+    <tr>
+      <td><div class="nlabel"><span>${d.icon}</span>${d.ad} <span style="font-size:11px;color:var(--muted);font-weight:400">(${d.soru})</span></div></td>
+      <td><input class="ninp" type="number" id="d_${d.id}" min="0" max="${d.soru}" placeholder="0" oninput="hesaplaNet()"></td>
+      <td><input class="ninp" type="number" id="y_${d.id}" min="0" max="${d.soru}" placeholder="0" oninput="hesaplaNet()"></td>
+      <td class="nres" id="n_${d.id}">—</td>
+    </tr>`).join('');
 }
 
 function hesaplaNet(){
@@ -350,42 +467,96 @@ async function deneKaydet(){
     obj[d.id+'_d']=dg;obj[d.id+'_y']=yl;obj[d.id+'_net']=net;
     netler[d.id]=net;toplam+=net;
   });
-  obj.toplam_net=toplam;obj.kpss_puan=parseFloat(hesaplaKPSSPuan(netler));
+  obj.toplam_net=toplam;
+  obj.kpss_puan=parseFloat(hesaplaKPSSPuan(netler));
   const {data,error}=await sb.from('kpss_denemeler').insert(obj).select();
   if(!error&&data){
     denemelerCache.unshift(data[0]);
     document.getElementById('deneAd').value='';
-    DERSLER.forEach(d=>{document.getElementById('d_'+d.id).value='';document.getElementById('y_'+d.id).value='';document.getElementById('n_'+d.id).textContent='—'});
-    document.getElementById('topNet').textContent='—';document.getElementById('puanVal').textContent='—';
-    showToast('✓ Deneme kaydedildi!');updateBadge();
+    DERSLER.forEach(d=>{
+      document.getElementById('d_'+d.id).value='';
+      document.getElementById('y_'+d.id).value='';
+      document.getElementById('n_'+d.id).textContent='—';
+    });
+    document.getElementById('topNet').textContent='—';
+    document.getElementById('puanVal').textContent='—';
+    showToast('✓ Deneme kaydedildi!');
+    updateBadge();
   }
 }
 
+// ── GEÇMİŞ ──
 function renderGecmis(){
   const list=document.getElementById('gecmisList');
   if(!denemelerCache.length){list.innerHTML='<div class="empty">Henüz deneme eklemedin.<br>Net Hesapla sayfasından ekleyebilirsin.</div>';return}
-  list.innerHTML=denemelerCache.map((d,i)=>`<div class="gitem"><div class="gitem-info"><div class="gitem-ad">${d.ad}</div><div class="gitem-tarih">${d.tarih_kisa||''}</div><div class="gitem-dersler">${DERSLER.map(dr=>`<div class="gitem-ders">${dr.icon} ${(d[dr.id+'_net']||0).toFixed(1)}</div>`).join('')}</div></div><div class="gitem-net"><div class="gitem-net-val">${(d.toplam_net||0).toFixed(1)}</div><div class="gitem-net-lbl">toplam net</div><div class="gitem-puan">${(d.kpss_puan||0).toFixed(1)} P</div></div><button class="btn-sil" onclick="silDeneme('${d.id}',${i})">✕</button></div>`).join('');
+  list.innerHTML=denemelerCache.map((d,i)=>`
+    <div class="gitem">
+      <div class="gitem-info">
+        <div class="gitem-ad">${d.ad}</div>
+        <div class="gitem-tarih">${d.tarih_kisa||''}</div>
+        <div class="gitem-dersler">
+          ${DERSLER.map(dr=>`<div class="gitem-ders">${dr.icon} ${(d[dr.id+'_net']||0).toFixed(1)}</div>`).join('')}
+        </div>
+      </div>
+      <div class="gitem-net">
+        <div class="gitem-net-val">${(d.toplam_net||0).toFixed(1)}</div>
+        <div class="gitem-net-lbl">toplam net</div>
+        <div class="gitem-puan">${(d.kpss_puan||0).toFixed(1)} P</div>
+      </div>
+      <button class="btn-sil" onclick="silDeneme('${d.id}',${i})" title="Sil">✕</button>
+    </div>`).join('');
 }
 
 async function silDeneme(id,i){
-  if(!confirm('Silinsin mi?'))return;
+  if(!confirm('Bu denemeyi silmek istediğine emin misin?'))return;
   await sb.from('kpss_denemeler').delete().eq('id',id);
-  denemelerCache.splice(i,1);renderGecmis();updateBadge();
+  denemelerCache.splice(i,1);
+  renderGecmis();updateBadge();
 }
 
+// ── ANALİZ ──
 function renderAnaliz(){
-  if(!denemelerCache.length){document.getElementById('analizStats').innerHTML='<div class="empty" style="grid-column:1/-1">Henüz deneme eklemedin.</div>';document.getElementById('analizCards').innerHTML='';return}
+  if(!denemelerCache.length){
+    document.getElementById('analizStats').innerHTML='<div class="empty" style="grid-column:1/-1">Henüz deneme eklemedin.</div>';
+    document.getElementById('analizCards').innerHTML='';return;
+  }
   const nets=denemelerCache.map(d=>d.toplam_net||0);
   const puanlar=denemelerCache.map(d=>d.kpss_puan||0);
   const ort=nets.reduce((a,b)=>a+b,0)/nets.length;
   const en_yuksek=Math.max(...nets);
-  document.getElementById('analizStats').innerHTML=`<div class="scard"><div class="scard-val" style="color:var(--purple-light)">${nets[0].toFixed(1)}</div><div class="scard-lbl">Son deneme neti</div></div><div class="scard"><div class="scard-val" style="color:var(--gold)">${puanlar[0].toFixed(1)}</div><div class="scard-lbl">Son KPSS puanı</div></div><div class="scard"><div class="scard-val" style="color:var(--green)">${en_yuksek.toFixed(1)}</div><div class="scard-lbl">En yüksek net</div></div><div class="scard"><div class="scard-val" style="color:var(--muted)">${ort.toFixed(1)}</div><div class="scard-lbl">Ortalama net</div></div>`;
+  const son=nets[0];
+  const puan_son=puanlar[0];
+  document.getElementById('analizStats').innerHTML=`
+    <div class="scard"><div class="scard-val" style="color:var(--purple-light)">${son.toFixed(1)}</div><div class="scard-lbl">Son deneme neti</div></div>
+    <div class="scard"><div class="scard-val" style="color:var(--gold)">${puan_son.toFixed(1)}</div><div class="scard-lbl">Son KPSS puanı</div></div>
+    <div class="scard"><div class="scard-val" style="color:var(--green)">${en_yuksek.toFixed(1)}</div><div class="scard-lbl">En yüksek net</div></div>
+    <div class="scard"><div class="scard-val" style="color:var(--muted)">${ort.toFixed(1)}</div><div class="scard-lbl">Ortalama net</div></div>`;
   const dersOrts={};
-  DERSLER.forEach(d=>{const vals=denemelerCache.map(x=>x[d.id+'_net']||0);dersOrts[d.id]={ad:d.ad,icon:d.icon,ort:vals.reduce((a,b)=>a+b,0)/vals.length,renk:d.renk}});
+  DERSLER.forEach(d=>{
+    const vals=denemelerCache.map(x=>x[d.id+'_net']||0);
+    dersOrts[d.id]={ad:d.ad,icon:d.icon,ort:vals.reduce((a,b)=>a+b,0)/vals.length,renk:d.renk};
+  });
   const maxOrt=Math.max(...Object.values(dersOrts).map(x=>x.ort),1);
-  document.getElementById('analizCards').innerHTML=`<div class="acard"><div class="acard-title">Derse Göre Ortalama Net</div>${Object.values(dersOrts).map(d=>`<div class="arow"><div class="arow-label">${d.icon} ${d.ad}</div><div class="arow-val" style="color:${d.renk}">${d.ort.toFixed(1)}</div></div><div class="abar"><div class="abar-fill" style="width:${d.ort/maxOrt*100}%;background:${d.renk}"></div></div>`).join('')}</div><div class="acard"><div class="acard-title">Son ${Math.min(denemelerCache.length,6)} Deneme Trendi</div>${[...denemelerCache].slice(0,6).reverse().map(d=>`<div class="arow"><div class="arow-label">${d.ad} <span style="font-size:11px;color:var(--muted2)">${d.tarih_kisa||''}</span></div><div class="arow-val" style="color:var(--purple-light)">${(d.toplam_net||0).toFixed(1)} · <span style="color:var(--gold)">${(d.kpss_puan||0).toFixed(1)}P</span></div></div><div class="abar"><div class="abar-fill" style="width:${en_yuksek?(d.toplam_net||0)/en_yuksek*100:0}%"></div></div>`).join('')}</div>`;
+  document.getElementById('analizCards').innerHTML=`
+    <div class="acard">
+      <div class="acard-title">Derse Göre Ortalama Net</div>
+      ${Object.values(dersOrts).map(d=>`
+        <div class="arow"><div class="arow-label">${d.icon} ${d.ad}</div><div class="arow-val" style="color:${d.renk}">${d.ort.toFixed(1)}</div></div>
+        <div class="abar"><div class="abar-fill" style="width:${d.ort/maxOrt*100}%;background:${d.renk}"></div></div>`).join('')}
+    </div>
+    <div class="acard">
+      <div class="acard-title">Son ${Math.min(denemelerCache.length,6)} Deneme Trendi</div>
+      ${[...denemelerCache].slice(0,6).reverse().map(d=>`
+        <div class="arow">
+          <div class="arow-label">${d.ad} <span style="font-size:11px;color:var(--muted2)">${d.tarih_kisa||''}</span></div>
+          <div class="arow-val" style="color:var(--purple-light)">${(d.toplam_net||0).toFixed(1)} net · <span style="color:var(--gold)">${(d.kpss_puan||0).toFixed(1)}P</span></div>
+        </div>
+        <div class="abar"><div class="abar-fill" style="width:${en_yuksek?(d.toplam_net||0)/en_yuksek*100:0}%"></div></div>`).join('')}
+    </div>`;
 }
 
+// ── SAYFA ──
+let currentPage='video';
 function showPage(p){
   currentPage=p;
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
@@ -395,18 +566,26 @@ function showPage(p){
   document.getElementById('topbarTitle').textContent=titles[p];
   const navs=['video','net','gecmis','analiz'];
   document.querySelectorAll('.sb-nav-item')[navs.indexOf(p)].classList.add('active');
-  if(p==='gecmis')renderGecmis();if(p==='analiz')renderAnaliz();updateBadge();
+  if(p==='gecmis')renderGecmis();
+  if(p==='analiz')renderAnaliz();
+  updateBadge();
 }
 
+// ── TOAST ──
 function showToast(msg){
   const t=document.createElement('div');t.className='toast';
-  t.innerHTML='<span style="color:var(--purple-light)">✦</span>'+msg;
+  t.innerHTML='<span class="toast-icon">✦</span>'+msg;
   document.body.appendChild(t);setTimeout(()=>t.remove(),2500);
 }
 
+// ── OTOM. GİRİŞ ──
 window.onload=async()=>{
   const saved=localStorage.getItem('kpss_user');
-  if(saved){document.getElementById('loginUser').value=saved;document.getElementById('loginPass').value=SIFRE;await doLogin()}
+  if(saved){
+    document.getElementById('loginUser').value=saved;
+    document.getElementById('loginPass').value=SIFRE;
+    await doLogin();
+  }
 };
 </script>
 </body>
