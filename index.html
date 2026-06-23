@@ -1,590 +1,518 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPSS Takip</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#08070f;--surface:#111019;--surface2:#18162a;--surface3:#1f1d30;
-  --border:#2a2640;--border2:#362f55;
-  --purple:#8b5cf6;--purple2:#7c3aed;--purple-light:#a78bfa;
-  --text:#f0eeff;--muted:#7b7899;--muted2:#4a4768;
-  --green:#10b981;--red:#f43f5e;--gold:#f59e0b;--blue:#3b82f6;
-}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPSS 2026 Pro Takip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- PREMIUM CSS TASARIMI --- */
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: #0a0a0c;
+            --card-bg: rgba(20, 20, 25, 0.6);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #6d28d9;
+            --primary-glow: rgba(109, 40, 217, 0.4);
+            --primary-hover: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-muted: #8b92a5;
+            --danger: #ef4444;
+            --success: #10b981;
+            
+            /* Ders Renkleri ve Glow Efektleri */
+            --turkce: #8b5cf6; --turkce-glow: rgba(139, 92, 246, 0.2);
+            --matematik: #ef4444; --matematik-glow: rgba(239, 68, 68, 0.2);
+            --tarih: #f59e0b; --tarih-glow: rgba(245, 158, 11, 0.2);
+            --cografya: #10b981; --cografya-glow: rgba(16, 185, 129, 0.2);
+            --vatandaslik: #3b82f6; --vatandaslik-glow: rgba(59, 130, 246, 0.2);
+        }
 
-/* LOGIN */
-#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
-#loginScreen::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none}
-#loginScreen::after{content:'';position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,.06) 0%,transparent 70%);bottom:0;left:0;pointer-events:none}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:44px 40px;width:400px;max-width:92vw;position:relative;z-index:1}
-.login-logo{font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
-.login-title{font-size:26px;font-weight:600;margin-bottom:4px}
-.login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.5}
-.login-field{margin-bottom:14px}
-.login-field label{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
-.login-field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:.2s}
-.login-field input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.1)}
-.login-btn{width:100%;background:var(--purple2);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;margin-top:6px}
-.login-btn:hover{background:#6d28d9}
-.login-btn:active{transform:scale(.98)}
-.login-error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#fb7185;margin-top:10px;display:none}
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            background-image: radial-gradient(circle at 15% 50%, rgba(109, 40, 217, 0.05), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.05), transparent 25%);
+            color: var(--text-main); 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
-/* APP */
-#appScreen{display:none;min-height:100vh;flex-direction:row}
-#appScreen.show{display:flex}
-.sidebar{width:230px;min-width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10}
-.sb-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
-.sb-logo-text{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:2px}
-.sb-logo-name{font-size:18px;font-weight:600}
-.sb-nav{padding:10px 0;flex:1}
-.sb-nav-item{display:flex;align-items:center;gap:11px;padding:11px 20px;font-size:13px;color:var(--muted);cursor:pointer;border-left:2.5px solid transparent;transition:.15s;user-select:none}
-.sb-nav-item:hover{color:var(--text);background:rgba(139,92,246,.06)}
-.sb-nav-item.active{color:var(--text);background:rgba(139,92,246,.1);border-left-color:var(--purple)}
-.sb-nav-icon{font-size:16px;width:20px;text-align:center}
-.sb-divider{margin:6px 20px;height:1px;background:var(--border)}
-.sb-bottom{padding:16px 20px;border-top:1px solid var(--border)}
-.sb-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.sb-avatar{width:32px;height:32px;border-radius:50%;background:rgba(139,92,246,.2);color:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
-.sb-username{font-size:13px;font-weight:500}
-.sb-logout{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;padding:0;transition:.15s}
-.sb-logout:hover{color:var(--red)}
-.sb-progress{margin-top:12px}
-.sb-prog-label{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
-.sb-prog-bar{height:4px;background:var(--surface3);border-radius:2px}
-.sb-prog-fill{height:100%;background:var(--purple);border-radius:2px;transition:.5s}
+        /* Scrollbar Özelleştirme */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-/* MAIN */
-.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:15px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
-.topbar-title{font-size:15px;font-weight:500}
-.topbar-badge{background:rgba(139,92,246,.12);color:var(--purple-light);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:500}
-.content{padding:24px 28px;flex:1}
+        button { cursor: pointer; border: none; background: none; color: inherit; transition: all 0.3s ease; }
+        input { background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); color: #fff; padding: 14px 16px; border-radius: 12px; outline: none; width: 100%; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 600; width: 100%; box-shadow: 0 4px 15px var(--primary-glow); transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--primary-glow); }
 
-/* PAGES */
-.page{display:none}.page.active{display:block}
+        /* Login Ekranı (Glassmorphism) */
+        #login-view { position: fixed; inset: 0; background: rgba(5,5,5,0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .login-box { background: var(--card-bg); padding: 50px 40px; border-radius: 24px; border: 1px solid var(--card-border); width: 400px; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .login-box h2 { font-size: 28px; font-weight: 800; background: linear-gradient(to right, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* FOLDERS */
-.folder{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;transition:.2s}
-.folder:hover{border-color:var(--border2)}
-.folder-hdr{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none}
-.folder-hdr:hover{background:rgba(139,92,246,.04)}
-.folder-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.folder-name{font-size:14px;font-weight:500;flex:1}
-.folder-meta{font-size:12px;color:var(--muted);margin-right:8px}
-.folder-arrow{font-size:11px;color:var(--muted2);transition:.25s;display:inline-block}
-.folder.open .folder-arrow{transform:rotate(180deg)}
-.folder-prog-wrap{padding:0 18px 12px}
-.folder-prog-bar{height:3px;background:var(--surface3);border-radius:2px}
-.folder-prog-fill{height:100%;border-radius:2px;transition:.5s}
-.vlist{border-top:1px solid var(--border);display:none}
-.folder.open .vlist{display:block}
-.vitem{display:flex;align-items:center;gap:11px;padding:11px 18px;border-bottom:1px solid var(--surface3);transition:.15s}
-.vitem:last-child{border-bottom:none}
-.vitem:hover{background:rgba(255,255,255,.015)}
-.vcheck{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:.2s;cursor:pointer}
-.vcheck.done{background:var(--purple2);border-color:var(--purple2);color:#fff}
-.vname{font-size:13px;flex:1;line-height:1.4;color:var(--text)}
-.vname.done{text-decoration:line-through;color:var(--muted)}
-.vlink{font-size:11px;color:var(--purple-light);text-decoration:none;padding:4px 9px;border-radius:6px;background:rgba(139,92,246,.1);white-space:nowrap;flex-shrink:0;transition:.15s}
-.vlink:hover{background:rgba(139,92,246,.2)}
+        /* Sidebar Tasarımı */
+        .sidebar { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 30px 24px; position: relative; z-index: 10; box-shadow: 5px 0 30px rgba(0,0,0,0.2); }
+        .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 50px; display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary), var(--primary-hover)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 4px 10px var(--primary-glow); }
+        
+        .nav-item { padding: 14px 18px; border-radius: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; transition: 0.3s; }
+        .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; transform: translateX(4px); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(109, 40, 217, 0.15), transparent); color: var(--primary-hover); border-left: 3px solid var(--primary); font-weight: 600; }
+        
+        .sidebar-footer { margin-top: auto; background: var(--card-bg); padding: 20px; border-radius: 16px; border: 1px solid var(--card-border); }
+        .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .user-name { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .user-avatar { width: 24px; height: 24px; background: var(--primary); border-radius: 50%; display: inline-block; }
+        .logout { color: var(--danger); font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; background: rgba(239, 68, 68, 0.1); }
+        .logout:hover { background: rgba(239, 68, 68, 0.2); }
 
-/* NET HESAP */
-.sec-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
-.dform{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px}
-.dform-top{display:flex;gap:12px;margin-bottom:20px;align-items:center}
-.dform-top label{font-size:12px;color:var(--muted);white-space:nowrap;font-weight:500}
-.dname-inp{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:.2s}
-.dname-inp:focus{border-color:var(--purple)}
-.ntable{width:100%;border-collapse:collapse}
-.ntable th{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;padding:0 8px 12px;text-align:center;font-weight:500}
-.ntable th:first-child{text-align:left;padding-left:0}
-.ntable td{padding:6px 8px}
-.ntable td:first-child{padding-left:0}
-.nlabel{font-size:13px;font-weight:500;padding:8px 0;display:flex;align-items:center;gap:8px}
-.ninp{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 6px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;font-weight:500;text-align:center;outline:none;transition:.2s}
-.ninp:focus{border-color:var(--purple)}
-.nres{font-size:15px;font-weight:600;color:var(--purple-light);text-align:center}
-.ntotal td{border-top:1px solid var(--border);padding-top:14px}
-.puan-box{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-top:14px}
-.puan-label{font-size:13px;color:var(--muted)}
-.puan-val{font-size:22px;font-weight:600;color:var(--purple-light)}
-.btn-kaydet{background:var(--purple2);color:#fff;border:none;border-radius:9px;padding:11px 24px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;margin-top:14px}
-.btn-kaydet:hover{background:#6d28d9}
-.btn-kaydet:active{transform:scale(.98)}
+        .progress-bar-container { width: 100%; }
+        .progress-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+        .progress-bar { height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #a78bfa); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px var(--primary-glow); }
 
-/* GEÇMİŞ */
-.glist{display:flex;flex-direction:column;gap:8px}
-.gitem{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 18px;display:flex;align-items:center;gap:16px;transition:.2s}
-.gitem:hover{border-color:var(--border2)}
-.gitem-info{flex:1}
-.gitem-ad{font-size:14px;font-weight:500;margin-bottom:4px}
-.gitem-tarih{font-size:11px;color:var(--muted)}
-.gitem-dersler{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.gitem-ders{font-size:11px;color:var(--muted);background:var(--surface2);border-radius:5px;padding:3px 8px}
-.gitem-net{text-align:right}
-.gitem-net-val{font-size:22px;font-weight:600;color:var(--purple-light)}
-.gitem-net-lbl{font-size:10px;color:var(--muted)}
-.gitem-puan{font-size:13px;color:var(--gold);font-weight:500;margin-top:2px}
-.btn-sil{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;padding:4px;transition:.15s}
-.btn-sil:hover{color:var(--red)}
-.empty{text-align:center;padding:50px 20px;color:var(--muted);font-size:14px;line-height:1.8}
+        /* Ana İçerik Alanı */
+        .main-content { flex: 1; overflow-y: auto; padding: 50px 60px; scroll-behavior: smooth; }
+        .page { display: none; max-width: 1100px; margin: 0 auto; animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .page.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 32px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
+        .page-header p { color: var(--text-muted); font-size: 16px; }
 
-/* ANALİZ */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.scard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
-.scard-val{font-size:24px;font-weight:600;margin-bottom:4px}
-.scard-lbl{font-size:11px;color:var(--muted)}
-.acard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:10px}
-.acard-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:14px}
-.arow{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.arow-label{font-size:13px;color:var(--muted)}
-.arow-val{font-size:13px;font-weight:500}
-.abar{height:3px;background:var(--surface3);border-radius:2px;margin-bottom:10px}
-.abar-fill{height:100%;border-radius:2px;transition:.6s}
+        /* Video Klasörleri */
+        .folder { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; margin-bottom: 20px; overflow: hidden; transition: 0.3s; backdrop-filter: blur(10px); }
+        .folder:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(-2px); }
+        .folder-head { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(255,255,255,0.02); }
+        .folder-title { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 12px; }
+        .folder-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        
+        .folder-stats { text-align: right; min-width: 120px; }
+        .folder-stats-text { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+        
+        .video-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--card-border); max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .folder.open .video-list { max-height: 2000px; padding: 1px; } /* Grid lines effect */
+        
+        .video-row { background: var(--bg-panel); padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: 0.2s; position: relative; overflow: hidden; }
+        .video-row:hover { background: rgba(255,255,255,0.03); }
+        .video-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; transition: 0.2s; }
+        .video-row:hover::before { background: currentColor; }
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--purple);border-radius:11px;padding:13px 18px;font-size:13px;display:flex;align-items:center;gap:9px;z-index:999;animation:tin .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.5)}
-@keyframes tin{from{opacity:0;transform:translateX(70px)}to{opacity:1;transform:translateX(0)}}
-.toast-icon{color:var(--purple-light)}
-.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);font-size:14px;gap:10px}
-.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-</style>
+        .chk-box { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+        .video-row.done .chk-box { background: currentColor; border-color: currentColor; box-shadow: 0 0 10px currentColor; }
+        .video-row.done .chk-box::after { content: '✓'; color: #000; font-size: 14px; font-weight: 800; }
+        
+        /* Direkt YouTube linkine giden metin */
+        .lesson-link { flex: 1; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; transition: 0.2s; cursor: pointer; display: block; }
+        .lesson-link:hover { color: currentColor; transform: translateX(4px); }
+        .video-row.done .lesson-link { text-decoration: line-through; color: var(--text-muted); opacity: 0.6; }
+
+        /* Net Hesaplama Ekranı */
+        .calc-wrapper { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 40px; backdrop-filter: blur(10px); }
+        .calc-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 20px; align-items: center; margin-bottom: 20px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 16px; transition: 0.3s; border: 1px solid transparent; }
+        .calc-grid:hover { border-color: rgba(255,255,255,0.05); transform: scale(1.01); }
+        .calc-grid input { text-align: center; font-size: 16px; font-weight: 600; background: rgba(255,255,255,0.03); }
+        .net-result { font-weight: 800; font-size: 20px; text-align: right; padding-right: 10px; }
+        
+        .score-board { display: flex; justify-content: space-between; background: linear-gradient(135deg, rgba(109, 40, 217, 0.1), rgba(16, 185, 129, 0.1)); padding: 30px; border-radius: 20px; margin: 30px 0; border: 1px solid var(--card-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .score-item { display: flex; flex-direction: column; gap: 8px; }
+        .score-item span { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .score-item div { font-size: 36px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        /* Kartlar (Geçmiş & Analiz) */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .exam-card { background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border); position: relative; transition: 0.3s; backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; }
+        .exam-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); }
+        .del-btn { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: bold; opacity: 0; transition: 0.3s; }
+        .exam-card:hover .del-btn { opacity: 1; }
+        .del-btn:hover { background: var(--danger); color: #fff; }
+        
+        .exam-nets { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+        .tag { font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 6px; border: 1px solid currentColor; background: rgba(0,0,0,0.2); }
+        
+        .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
+        .stat-card { background: linear-gradient(180deg, var(--card-bg), rgba(10,10,12,0.8)); padding: 24px; border-radius: 20px; border: 1px solid var(--card-border); text-align: center; backdrop-filter: blur(10px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .stat-card span { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .stat-card div { font-size: 32px; font-weight: 800; margin-top: 12px; }
+
+        /* Toast Bildirim */
+        #toast { position: fixed; bottom: 30px; right: 30px; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--primary); border-left: 4px solid var(--primary); padding: 16px 24px; border-radius: 12px; font-size: 15px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px var(--primary-glow); z-index: 1000; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #toast.show { transform: translateX(0); }
+    </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">2026 KPSS</div>
-    <div class="login-title">Hoş geldin 👋</div>
-    <div class="login-sub">Kullanıcı adını gir, verilerine her cihazdan eriş.</div>
-    <div class="login-field">
-      <label>Kullanıcı Adı</label>
-      <input type="text" id="loginUser" placeholder="adın veya takma ad" autocomplete="off">
-    </div>
-    <div class="login-field">
-      <label>Şifre</label>
-      <input type="password" id="loginPass" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="login-btn" onclick="doLogin()">Giriş Yap</button>
-    <div class="login-error" id="loginErr">Şifre yanlış!</div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="appScreen">
-  <div class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-text">2026 KPSS</div>
-      <div class="sb-logo-name">Takip Paneli</div>
-    </div>
-    <div class="sb-nav">
-      <div class="sb-nav-item active" onclick="showPage('video')"><span class="sb-nav-icon">🎬</span>Video Takip</div>
-      <div class="sb-nav-item" onclick="showPage('net')"><span class="sb-nav-icon">🧮</span>Net Hesapla</div>
-      <div class="sb-nav-item" onclick="showPage('gecmis')"><span class="sb-nav-icon">📋</span>Deneme Geçmişi</div>
-      <div class="sb-nav-item" onclick="showPage('analiz')"><span class="sb-nav-icon">📊</span>Analiz</div>
-    </div>
-    <div class="sb-bottom">
-      <div class="sb-user">
-        <div class="sb-avatar" id="sbAvatar">?</div>
-        <div>
-          <div class="sb-username" id="sbUsername">—</div>
-          <button class="sb-logout" onclick="doLogout()">Çıkış Yap</button>
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-view">
+        <div class="login-box">
+            <h2>Sisteme Giriş</h2>
+            <div class="input-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="username" placeholder="Adınızı giriniz..." autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>Şifre</label>
+                <input type="password" id="password" placeholder="Şifre: 1234">
+            </div>
+            <button class="btn-primary" onclick="app.login()" style="margin-top: 10px;">Oturum Aç</button>
         </div>
-      </div>
-      <div class="sb-progress">
-        <div class="sb-prog-label">
-          <span>Genel İlerleme</span>
-          <span id="sbProgText" style="color:var(--purple-light)">0%</span>
-        </div>
-        <div class="sb-prog-bar"><div class="sb-prog-fill" id="sbProgFill" style="width:0%"></div></div>
-      </div>
     </div>
-  </div>
 
-  <div class="main">
-    <div class="topbar">
-      <div class="topbar-title" id="topbarTitle">Video Takip</div>
-      <div class="topbar-badge" id="topbarBadge"></div>
-    </div>
-    <div class="content">
-
-      <!-- VİDEO SAYFASI -->
-      <div class="page active" id="page-video">
-        <div id="videoContent"><div class="loading"><div class="spin"></div>Yükleniyor...</div></div>
-      </div>
-
-      <!-- NET HESAP -->
-      <div class="page" id="page-net">
-        <div class="sec-title">Yeni Deneme Ekle</div>
-        <div class="dform">
-          <div class="dform-top">
-            <label>Deneme Adı</label>
-            <input class="dname-inp" id="deneAd" placeholder="Örn: Deneme 1, Mart Denemesi...">
-          </div>
-          <table class="ntable">
-            <thead><tr>
-              <th style="text-align:left">Ders</th>
-              <th>Doğru</th><th>Yanlış</th><th>Net</th>
-            </tr></thead>
-            <tbody id="netBody"></tbody>
-            <tfoot><tr class="ntotal">
-              <td><span style="font-size:13px;font-weight:600">Toplam</span></td>
-              <td></td><td></td>
-              <td class="nres" id="topNet">—</td>
-            </tr></tfoot>
-          </table>
-          <div class="puan-box">
-            <div class="puan-label">Tahmini KPSS-P10 Puanı</div>
-            <div class="puan-val" id="puanVal">—</div>
-          </div>
-          <button class="btn-kaydet" onclick="deneKaydet()">✓ Denemeyi Kaydet</button>
+    <!-- SİDEBAR -->
+    <aside class="sidebar" id="sidebar" style="display:none;">
+        <div class="logo">
+            <div class="logo-icon">✦</div>
+            KPSS Pro
         </div>
-      </div>
-
-      <!-- GEÇMİŞ -->
-      <div class="page" id="page-gecmis">
-        <div class="sec-title">Deneme Geçmişi</div>
-        <div class="glist" id="gecmisList"></div>
-      </div>
-
-      <!-- ANALİZ -->
-      <div class="page" id="page-analiz">
-        <div class="sec-title">Performans Analizi</div>
-        <div class="stat-grid" id="analizStats"></div>
-        <div id="analizCards"></div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<script>
-const SUPA_URL = 'https://rovzbxstktopuewlyobo.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdnpieHN0a3RvcHVld2x5b2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjMxODMsImV4cCI6MjA5NzczOTE4M30.6mm2V4H4sNTEeRacV-sTygesF3VV0Q1GG68lYwAzsYg';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-const SIFRE = '1234';
-let currentUser = null;
-let progressCache = {};
-let denemelerCache = [];
-
-const DERSLER = [
-  {id:'turkce', ad:'Türkçe', icon:'📖', renk:'#8b5cf6', list:'PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn', videoSayisi:46, soru:30},
-  {id:'matematik', ad:'Matematik', icon:'📐', renk:'#ef4444', list:'PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1', videoSayisi:81, soru:30},
-  {id:'tarih', ad:'Tarih', icon:'🏛️', renk:'#f59e0b', list:'PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF', videoSayisi:60, soru:27},
-  {id:'cografya', ad:'Coğrafya', icon:'🌍', renk:'#10b981', list:'PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK', videoSayisi:34, soru:18},
-  {id:'vatandaslik', ad:'Vatandaşlık', icon:'⚖️', renk:'#3b82f6', list:'PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE', videoSayisi:48, soru:9},
-  {id:'guncel', ad:'Güncel Bilgiler', icon:'📰', renk:'#ec4899', list:'', videoSayisi:0, soru:6},
-];
-// Türkçe 30 + Matematik 30 + Tarih 27 + Coğrafya 18 + Vatandaşlık 9 + Güncel 6 = 120 ✅
-
-function hesaplaKPSSPuan(netler) {
-  const toplam = Object.values(netler).reduce((a,b)=>a+b,0);
-  return Math.max(0, 50 + toplam * 0.65).toFixed(2);
-}
-
-// ── LOGIN ──
-async function doLogin() {
-  const user = document.getElementById('loginUser').value.trim().toLowerCase();
-  const pass = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginErr');
-  if(!user){err.textContent='Kullanıcı adı gir!';err.style.display='block';return}
-  if(pass !== SIFRE){err.style.display='block';err.textContent='Şifre yanlış!';return}
-  err.style.display='none';
-  // Kullanıcıyı kaydet/bul
-  const {data:existing} = await sb.from('kpss_users').select('username').eq('username',user).single();
-  if(!existing){
-    await sb.from('kpss_users').insert({username:user});
-  }
-  currentUser = user;
-  localStorage.setItem('kpss_user', user);
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('appScreen').classList.add('show');
-  document.getElementById('sbUsername').textContent = user;
-  document.getElementById('sbAvatar').textContent = user[0].toUpperCase();
-  await loadProgress();
-  renderVideo();
-  renderNetTable();
-  updateBadge();
-}
-
-function doLogout(){
-  localStorage.removeItem('kpss_user');
-  currentUser=null;progressCache={};denemelerCache=[];
-  document.getElementById('appScreen').classList.remove('show');
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginPass').value='';
-}
-
-// ── PROGRESS ──
-async function loadProgress(){
-  const {data} = await sb.from('kpss_progress').select('video_id,completed').eq('username',currentUser);
-  progressCache={};
-  if(data) data.forEach(r=>{if(r.completed)progressCache[r.video_id]=true});
-  const {data:d2} = await sb.from('kpss_denemeler').select('*').eq('username',currentUser).order('created_at',{ascending:false});
-  denemelerCache = d2||[];
-}
-
-async function toggleVideo(vid, plid){
-  const done = !progressCache[vid];
-  if(done){
-    progressCache[vid]=true;
-    await sb.from('kpss_progress').upsert({username:currentUser,video_id:vid,completed:true},{onConflict:'username,video_id'});
-    showToast('✓ Video tamamlandı!');
-  } else {
-    delete progressCache[vid];
-    await sb.from('kpss_progress').delete().eq('username',currentUser).eq('video_id',vid);
-  }
-  const chk=document.getElementById('chk_'+vid);
-  const nm=document.getElementById('vn_'+vid);
-  if(chk&&nm){
-    if(done){chk.classList.add('done');chk.textContent='✓';nm.classList.add('done')}
-    else{chk.classList.remove('done');chk.textContent='';nm.classList.remove('done')}
-  }
-  updateFolderMeta(plid);
-  updateSidebar();updateBadge();
-}
-
-// ── VİDEO RENDER ──
-function renderVideo(){
-  const wrap=document.getElementById('videoContent');
-  wrap.innerHTML='';
-  DERSLER.filter(ders=>ders.videoSayisi>0).forEach(ders=>{
-    const videolar = Array.from({length:ders.videoSayisi},(_,i)=>({
-      id:ders.id+'_'+i,
-      ad:(i+1)+'. Ders',
-      url:'https://www.youtube.com/watch?list='+ders.list+'&index='+(i+1)
-    }));
-    const tam=videolar.filter(v=>progressCache[v.id]).length;
-    const pct=Math.round(tam/videolar.length*100);
-    const div=document.createElement('div');
-    div.className='folder';div.id='folder_'+ders.id;
-    div.innerHTML=`
-      <div class="folder-hdr" onclick="toggleFolder('${ders.id}')">
-        <div class="folder-icon" style="background:${ders.renk}18">${ders.icon}</div>
-        <div class="folder-name">${ders.ad}</div>
-        <div class="folder-meta" id="fmeta_${ders.id}">${tam}/${videolar.length} tamamlandı</div>
-        <span class="folder-arrow" id="farr_${ders.id}">▾</span>
-      </div>
-      <div class="folder-prog-wrap">
-        <div class="folder-prog-bar"><div class="folder-prog-fill" id="fprog_${ders.id}" style="width:${pct}%;background:${ders.renk}"></div></div>
-      </div>
-      <div class="vlist" id="vlist_${ders.id}">
-        ${videolar.map(v=>{
-          const done=!!progressCache[v.id];
-          return`<div class="vitem">
-            <div class="vcheck ${done?'done':''}" id="chk_${v.id}" onclick="toggleVideo('${v.id}','${ders.id}')">${done?'✓':''}</div>
-            <div class="vname ${done?'done':''}" id="vn_${v.id}">${v.ad}</div>
-          </div>`;
-        }).join('')}
-      </div>`;
-    wrap.appendChild(div);
-  });
-  updateSidebar();
-}
-
-function toggleFolder(id){
-  document.getElementById('folder_'+id).classList.toggle('open');
-}
-
-function updateFolderMeta(plid){
-  const ders=DERSLER.find(d=>d.id===plid);
-  if(!ders)return;
-  const tam=Array.from({length:ders.videoSayisi},(_,i)=>progressCache[ders.id+'_'+i]).filter(Boolean).length;
-  const pct=Math.round(tam/ders.videoSayisi*100);
-  const m=document.getElementById('fmeta_'+plid);
-  const p=document.getElementById('fprog_'+plid);
-  if(m)m.textContent=tam+'/'+ders.videoSayisi+' tamamlandı';
-  if(p)p.style.width=pct+'%';
-}
-
-function updateSidebar(){
-  let total=0,done=0;
-  DERSLER.forEach(d=>{
-    for(let i=0;i<d.videoSayisi;i++){total++;if(progressCache[d.id+'_'+i])done++}
-  });
-  const pct=total?Math.round(done/total*100):0;
-  document.getElementById('sbProgFill').style.width=pct+'%';
-  document.getElementById('sbProgText').textContent=pct+'%';
-}
-
-function updateBadge(){
-  const badge=document.getElementById('topbarBadge');
-  if(currentPage==='video'){
-    let total=0,done=0;
-    DERSLER.forEach(d=>{for(let i=0;i<d.videoSayisi;i++){total++;if(progressCache[d.id+'_'+i])done++}});
-    badge.textContent=done+' / '+total+' tamamlandı';
-  } else if(currentPage==='gecmis'||currentPage==='analiz'){
-    badge.textContent=denemelerCache.length+' deneme';
-  } else badge.textContent='';
-}
-
-// ── NET HESAP ──
-function renderNetTable(){
-  document.getElementById('netBody').innerHTML=DERSLER.map(d=>`
-    <tr>
-      <td><div class="nlabel"><span>${d.icon}</span>${d.ad} <span style="font-size:11px;color:var(--muted);font-weight:400">(${d.soru})</span></div></td>
-      <td><input class="ninp" type="number" id="d_${d.id}" min="0" max="${d.soru}" placeholder="0" oninput="hesaplaNet()"></td>
-      <td><input class="ninp" type="number" id="y_${d.id}" min="0" max="${d.soru}" placeholder="0" oninput="hesaplaNet()"></td>
-      <td class="nres" id="n_${d.id}">—</td>
-    </tr>`).join('');
-}
-
-function hesaplaNet(){
-  let toplam=0;const netler={};
-  DERSLER.forEach(d=>{
-    const dg=parseFloat(document.getElementById('d_'+d.id).value)||0;
-    const yl=parseFloat(document.getElementById('y_'+d.id).value)||0;
-    const net=Math.max(0,dg-(yl/4));
-    document.getElementById('n_'+d.id).textContent=net.toFixed(2);
-    netler[d.id]=net;toplam+=net;
-  });
-  document.getElementById('topNet').textContent=toplam.toFixed(2);
-  document.getElementById('puanVal').textContent=hesaplaKPSSPuan(netler)+' P';
-}
-
-async function deneKaydet(){
-  if(!currentUser)return;
-  const ad=document.getElementById('deneAd').value.trim()||('Deneme '+(denemelerCache.length+1));
-  const obj={username:currentUser,ad,tarih_kisa:new Date().toLocaleDateString('tr-TR')};
-  let toplam=0;const netler={};
-  DERSLER.forEach(d=>{
-    const dg=parseFloat(document.getElementById('d_'+d.id).value)||0;
-    const yl=parseFloat(document.getElementById('y_'+d.id).value)||0;
-    const net=Math.max(0,dg-yl/4);
-    obj[d.id+'_d']=dg;obj[d.id+'_y']=yl;obj[d.id+'_net']=net;
-    netler[d.id]=net;toplam+=net;
-  });
-  obj.toplam_net=toplam;
-  obj.kpss_puan=parseFloat(hesaplaKPSSPuan(netler));
-  const {data,error}=await sb.from('kpss_denemeler').insert(obj).select();
-  if(!error&&data){
-    denemelerCache.unshift(data[0]);
-    document.getElementById('deneAd').value='';
-    DERSLER.forEach(d=>{
-      document.getElementById('d_'+d.id).value='';
-      document.getElementById('y_'+d.id).value='';
-      document.getElementById('n_'+d.id).textContent='—';
-    });
-    document.getElementById('topNet').textContent='—';
-    document.getElementById('puanVal').textContent='—';
-    showToast('✓ Deneme kaydedildi!');
-    updateBadge();
-  }
-}
-
-// ── GEÇMİŞ ──
-function renderGecmis(){
-  const list=document.getElementById('gecmisList');
-  if(!denemelerCache.length){list.innerHTML='<div class="empty">Henüz deneme eklemedin.<br>Net Hesapla sayfasından ekleyebilirsin.</div>';return}
-  list.innerHTML=denemelerCache.map((d,i)=>`
-    <div class="gitem">
-      <div class="gitem-info">
-        <div class="gitem-ad">${d.ad}</div>
-        <div class="gitem-tarih">${d.tarih_kisa||''}</div>
-        <div class="gitem-dersler">
-          ${DERSLER.map(dr=>`<div class="gitem-ders">${dr.icon} ${(d[dr.id+'_net']||0).toFixed(1)}</div>`).join('')}
+        <div style="flex: 1;">
+            <button class="nav-item active" onclick="app.nav('videos')">🎬 Video Takip</button>
+            <button class="nav-item" onclick="app.nav('calc')">🧮 Net Hesapla</button>
+            <button class="nav-item" onclick="app.nav('history')">📋 Geçmiş</button>
+            <button class="nav-item" onclick="app.nav('analysis')">📊 Analiz</button>
         </div>
-      </div>
-      <div class="gitem-net">
-        <div class="gitem-net-val">${(d.toplam_net||0).toFixed(1)}</div>
-        <div class="gitem-net-lbl">toplam net</div>
-        <div class="gitem-puan">${(d.kpss_puan||0).toFixed(1)} P</div>
-      </div>
-      <button class="btn-sil" onclick="silDeneme('${d.id}',${i})" title="Sil">✕</button>
-    </div>`).join('');
-}
-
-async function silDeneme(id,i){
-  if(!confirm('Bu denemeyi silmek istediğine emin misin?'))return;
-  await sb.from('kpss_denemeler').delete().eq('id',id);
-  denemelerCache.splice(i,1);
-  renderGecmis();updateBadge();
-}
-
-// ── ANALİZ ──
-function renderAnaliz(){
-  if(!denemelerCache.length){
-    document.getElementById('analizStats').innerHTML='<div class="empty" style="grid-column:1/-1">Henüz deneme eklemedin.</div>';
-    document.getElementById('analizCards').innerHTML='';return;
-  }
-  const nets=denemelerCache.map(d=>d.toplam_net||0);
-  const puanlar=denemelerCache.map(d=>d.kpss_puan||0);
-  const ort=nets.reduce((a,b)=>a+b,0)/nets.length;
-  const en_yuksek=Math.max(...nets);
-  const son=nets[0];
-  const puan_son=puanlar[0];
-  document.getElementById('analizStats').innerHTML=`
-    <div class="scard"><div class="scard-val" style="color:var(--purple-light)">${son.toFixed(1)}</div><div class="scard-lbl">Son deneme neti</div></div>
-    <div class="scard"><div class="scard-val" style="color:var(--gold)">${puan_son.toFixed(1)}</div><div class="scard-lbl">Son KPSS puanı</div></div>
-    <div class="scard"><div class="scard-val" style="color:var(--green)">${en_yuksek.toFixed(1)}</div><div class="scard-lbl">En yüksek net</div></div>
-    <div class="scard"><div class="scard-val" style="color:var(--muted)">${ort.toFixed(1)}</div><div class="scard-lbl">Ortalama net</div></div>`;
-  const dersOrts={};
-  DERSLER.forEach(d=>{
-    const vals=denemelerCache.map(x=>x[d.id+'_net']||0);
-    dersOrts[d.id]={ad:d.ad,icon:d.icon,ort:vals.reduce((a,b)=>a+b,0)/vals.length,renk:d.renk};
-  });
-  const maxOrt=Math.max(...Object.values(dersOrts).map(x=>x.ort),1);
-  document.getElementById('analizCards').innerHTML=`
-    <div class="acard">
-      <div class="acard-title">Derse Göre Ortalama Net</div>
-      ${Object.values(dersOrts).map(d=>`
-        <div class="arow"><div class="arow-label">${d.icon} ${d.ad}</div><div class="arow-val" style="color:${d.renk}">${d.ort.toFixed(1)}</div></div>
-        <div class="abar"><div class="abar-fill" style="width:${d.ort/maxOrt*100}%;background:${d.renk}"></div></div>`).join('')}
-    </div>
-    <div class="acard">
-      <div class="acard-title">Son ${Math.min(denemelerCache.length,6)} Deneme Trendi</div>
-      ${[...denemelerCache].slice(0,6).reverse().map(d=>`
-        <div class="arow">
-          <div class="arow-label">${d.ad} <span style="font-size:11px;color:var(--muted2)">${d.tarih_kisa||''}</span></div>
-          <div class="arow-val" style="color:var(--purple-light)">${(d.toplam_net||0).toFixed(1)} net · <span style="color:var(--gold)">${(d.kpss_puan||0).toFixed(1)}P</span></div>
+        
+        <div class="sidebar-footer">
+            <div class="user-row">
+                <div class="user-name">
+                    <span class="user-avatar"></span>
+                    <span id="user-display"></span>
+                </div>
+                <button class="logout" onclick="app.logout()">Çıkış</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-info">
+                    <span>İlerleme</span>
+                    <span id="prog-text">0/269</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="prog-fill"></div>
+                </div>
+            </div>
         </div>
-        <div class="abar"><div class="abar-fill" style="width:${en_yuksek?(d.toplam_net||0)/en_yuksek*100:0}%"></div></div>`).join('')}
-    </div>`;
-}
+    </aside>
 
-// ── SAYFA ──
-let currentPage='video';
-function showPage(p){
-  currentPage=p;
-  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.sb-nav-item').forEach(el=>el.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-  const titles={video:'Video Takip',net:'Net Hesapla',gecmis:'Deneme Geçmişi',analiz:'Performans Analizi'};
-  document.getElementById('topbarTitle').textContent=titles[p];
-  const navs=['video','net','gecmis','analiz'];
-  document.querySelectorAll('.sb-nav-item')[navs.indexOf(p)].classList.add('active');
-  if(p==='gecmis')renderGecmis();
-  if(p==='analiz')renderAnaliz();
-  updateBadge();
-}
+    <!-- İÇERİK ALANI -->
+    <main class="main-content" id="main" style="display:none;">
+        
+        <!-- VİDEOLAR (Oynatma Listesine Giden Linkli) -->
+        <div id="videos" class="page active">
+            <div class="page-header">
+                <h1>Video Takip Paneli</h1>
+                <p>İzlemek istediğin dersin linkine tıkla, video YouTube'da anında açılsın.</p>
+            </div>
+            <div id="folder-container"></div>
+        </div>
 
-// ── TOAST ──
-function showToast(msg){
-  const t=document.createElement('div');t.className='toast';
-  t.innerHTML='<span class="toast-icon">✦</span>'+msg;
-  document.body.appendChild(t);setTimeout(()=>t.remove(),2500);
-}
+        <!-- NET HESAPLA -->
+        <div id="calc" class="page">
+            <div class="page-header">
+                <h1>Deneme Simülasyonu</h1>
+                <p>Sonuçlarını girerek gerçek KPSS P10 puanını ve netlerini kaydet.</p>
+            </div>
+            <div class="calc-wrapper">
+                <input type="text" id="exam-name" placeholder="Deneme Adı (Örn: Türkiye Geneli 1)" style="margin-bottom: 30px; font-size: 18px; padding: 18px; background: rgba(0,0,0,0.4);">
+                
+                <div class="calc-grid" style="background:transparent; border:none; padding:0 16px; margin-bottom: 10px;">
+                    <div style="color:var(--text-muted); font-size:12px; font-weight:700; letter-spacing:1px;">BRANŞ</div>
+                    <div style="color:var(--text-muted); font-size:12px; font-weight:700; text-align:center;">DOĞRU</div>
+                    <div style="color:var(--text-muted); font-size:12px; font-weight:700; text-align:center;">YANLIŞ</div>
+                    <div style="color:var(--text-muted); font-size:12px; font-weight:700; text-align:right;">NET</div>
+                </div>
+                <div id="calc-inputs"></div>
+                
+                <div class="score-board">
+                    <div class="score-item">
+                        <span>Toplam Net</span>
+                        <div id="res-net" style="color: var(--text-main);">0.00</div>
+                    </div>
+                    <div class="score-item" style="text-align: right;">
+                        <span>KPSS P10 Tahmini</span>
+                        <div id="res-puan" style="color: var(--success);">50.00</div>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="app.saveExam()" style="padding: 18px; font-size: 16px;">Denemeyi Arşive Kaydet</button>
+            </div>
+        </div>
 
-// ── OTOM. GİRİŞ ──
-window.onload=async()=>{
-  const saved=localStorage.getItem('kpss_user');
-  if(saved){
-    document.getElementById('loginUser').value=saved;
-    document.getElementById('loginPass').value=SIFRE;
-    await doLogin();
-  }
-};
-</script>
+        <!-- GEÇMİŞ -->
+        <div id="history" class="page">
+            <div class="page-header">
+                <h1>Sınav Arşivi</h1>
+                <p>Bugüne kadar çözdüğün tüm denemelerin detaylı sonuçları.</p>
+            </div>
+            <div class="card-grid" id="history-list"></div>
+        </div>
+
+        <!-- ANALİZ -->
+        <div id="analysis" class="page">
+            <div class="page-header">
+                <h1>Gelişim Analizi</h1>
+                <p>Net ortalamaların ve sınav performans istatistiklerin.</p>
+            </div>
+            <div class="stat-cards">
+                <div class="stat-card"><span>Son Sınav Neti</span><div id="a-last" style="color:#fff;">-</div></div>
+                <div class="stat-card"><span>Güncel Puan</span><div id="a-puan" style="color:var(--success);">-</div></div>
+                <div class="stat-card"><span>Rekor Net</span><div id="a-max" style="color:var(--primary);">-</div></div>
+                <div class="stat-card"><span>Genel Ortalama</span><div id="a-avg" style="color:var(--tarih);">-</div></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bildirim Popup -->
+    <div id="toast">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <span id="toast-msg">İşlem başarılı.</span>
+    </div>
+
+    <script>
+        // Supabase Bağlantısı
+        const sb = supabase.createClient(
+            'https://rovzbxstktopuewlyobo.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdnpieHN0a3RvcHVld2x5b2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjMxODMsImV4cCI6MjA5NzczOTE4M30.6mm2V4H4sNTEeRacV-sTygesF3VV0Q1GG68lYwAzsYg'
+        );
+
+        // İlgili Oynatma Listeleri ve Parametreler
+        const subjects = [
+            { id: 'turkce', n: 'Türkçe', icon: '📖', c: 'var(--turkce)', bg: 'var(--turkce-glow)', cnt: 46, pl: 'PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn', q: 30 },
+            { id: 'matematik', n: 'Matematik', icon: '📐', c: 'var(--matematik)', bg: 'var(--matematik-glow)', cnt: 81, pl: 'PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1', q: 30 },
+            { id: 'tarih', n: 'Tarih', icon: '🏛️', c: 'var(--tarih)', bg: 'var(--tarih-glow)', cnt: 60, pl: 'PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF', q: 15 },
+            { id: 'cografya', n: 'Coğrafya', icon: '🌍', c: 'var(--cografya)', bg: 'var(--cografya-glow)', cnt: 34, pl: 'PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK', q: 10 },
+            { id: 'vatandaslik', n: 'Vatandaşlık', icon: '⚖️', c: 'var(--vatandaslik)', bg: 'var(--vatandaslik-glow)', cnt: 48, pl: 'PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE', q: 15 }
+        ];
+
+        const app = {
+            user: null, prog: new Set(), exams: [], totalV: 269,
+
+            async init() {
+                const u = localStorage.getItem('kpss_user');
+                if (u) await this.doLogin(u);
+                this.renderCalc();
+            },
+
+            async login() {
+                const u = document.getElementById('username').value.trim();
+                if (document.getElementById('password').value !== '1234') {
+                    this.toast("Hata: Şifre '1234' olmalıdır."); return;
+                }
+                if (u) await this.doLogin(u);
+            },
+
+            async doLogin(u) {
+                this.user = u; localStorage.setItem('kpss_user', u);
+                document.getElementById('user-display').innerText = u;
+                document.getElementById('login-view').style.display = 'none';
+                document.getElementById('sidebar').style.display = 'flex';
+                document.getElementById('main').style.display = 'block';
+                this.toast(`Hoş geldin, ${u}!`);
+                await this.loadData();
+            },
+
+            logout() {
+                localStorage.removeItem('kpss_user'); location.reload();
+            },
+
+            toast(msg) {
+                const t = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            },
+
+            nav(id) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+                event.target.classList.add('active');
+                if(id === 'history') this.renderHistory();
+                if(id === 'analysis') this.renderAnalysis();
+            },
+
+            async loadData() {
+                try {
+                    const [pRes, eRes] = await Promise.all([
+                        sb.from('kpss_progress').select('video_id').eq('username', this.user).eq('completed', true),
+                        sb.from('kpss_denemeler').select('*').eq('username', this.user).order('created_at')
+                    ]);
+                    this.prog = new Set(pRes.data?.map(d => d.video_id) || []);
+                    this.exams = eRes.data || [];
+                    this.renderVideos(); this.updateP();
+                } catch (e) {
+                    this.toast("Veriler yüklenirken hata oluştu.");
+                }
+            },
+
+            renderVideos() {
+                let h = '';
+                subjects.forEach(s => {
+                    let c = 0; for(let i=1; i<=s.cnt; i++) if(this.prog.has(`${s.id}_${i}`)) c++;
+                    h += `
+                    <div class="folder">
+                        <div class="folder-head" onclick="this.parentElement.classList.toggle('open')">
+                            <div class="folder-title">
+                                <div class="folder-icon" style="background:${s.bg}; color:${s.c}">${s.icon}</div>
+                                <span>${s.n}</span>
+                            </div>
+                            <div class="folder-stats">
+                                <div class="folder-stats-text"><span id="c-${s.id}">${c}</span> / ${s.cnt}</div>
+                                <div class="progress-bar"><div class="progress-fill" id="b-${s.id}" style="width:${(c/s.cnt)*100}%; background:${s.c}; box-shadow:0 0 10px ${s.bg}"></div></div>
+                            </div>
+                        </div>
+                        <div class="video-list">`;
+                    
+                    for(let i=1; i<=s.cnt; i++) {
+                        const vId = `${s.id}_${i}`, done = this.prog.has(vId);
+                        // Link Youtube'a yönlendirir, click event checkbox içindir.
+                        h += `
+                        <div class="video-row ${done ? 'done' : ''}" id="r-${vId}" style="color:${s.c}">
+                            <div class="chk-box" onclick="app.tog('${s.id}',${i})"></div>
+                            <a href="https://www.youtube.com/watch?list=${s.pl}&index=${i}" target="_blank" class="lesson-link" style="color: ${s.c}">
+                                ${i}. Ders — ${s.n} Videosunu Aç
+                            </a>
+                        </div>`;
+                    }
+                    h += `</div></div>`;
+                });
+                document.getElementById('folder-container').innerHTML = h;
+            },
+
+            async tog(sId, i) {
+                const vId = `${sId}_${i}`, row = document.getElementById(`r-${vId}`), isDone = !this.prog.has(vId);
+                isDone ? this.prog.add(vId) : this.prog.delete(vId);
+                row.classList.toggle('done', isDone);
+                this.updateP();
+                
+                let c = 0; 
+                for(let j=1; j<=subjects.find(x=>x.id==sId).cnt; j++) if(this.prog.has(`${sId}_${j}`)) c++;
+                
+                document.getElementById(`c-${sId}`).innerText = c;
+                document.getElementById(`b-${sId}`).style.width = `${(c/subjects.find(x=>x.id==sId).cnt)*100}%`;
+                
+                await sb.from('kpss_progress').upsert({ username: this.user, video_id: vId, completed: isDone }, { onConflict: 'username,video_id' });
+            },
+
+            updateP() {
+                const cnt = this.prog.size;
+                document.getElementById('prog-text').innerText = `${cnt} / ${this.totalV}`;
+                document.getElementById('prog-fill').style.width = `${(cnt/this.totalV)*100}%`;
+            },
+
+            renderCalc() {
+                let h = '';
+                subjects.forEach(s => {
+                    h += `
+                    <div class="calc-grid">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:${s.bg};color:${s.c};display:flex;align-items:center;justify-content:center;font-size:18px;">${s.icon}</div>
+                            <span style="font-weight:700; font-size:15px;">${s.n} <span style="font-size:11px;color:var(--text-muted)">(${s.q}S)</span></span>
+                        </div>
+                        <input type="number" id="d-${s.id}" min="0" max="${s.q}" value="0" oninput="app.calc()" placeholder="D">
+                        <input type="number" id="y-${s.id}" min="0" max="${s.q}" value="0" oninput="app.calc()" placeholder="Y">
+                        <div class="net-result" id="n-${s.id}" style="color:${s.c}">0.00</div>
+                    </div>`;
+                });
+                document.getElementById('calc-inputs').innerHTML = h;
+            },
+
+            calc() {
+                let top = 0;
+                subjects.forEach(s => {
+                    let d = +document.getElementById(`d-${s.id}`).value || 0, y = +document.getElementById(`y-${s.id}`).value || 0;
+                    if(d + y > s.q) { y = s.q - d; document.getElementById(`y-${s.id}`).value = y; }
+                    let net = Math.max(0, d - (y / 4));
+                    document.getElementById(`n-${s.id}`).innerText = net.toFixed(2); 
+                    top += net;
+                });
+                document.getElementById('res-net').innerText = top.toFixed(2);
+                document.getElementById('res-puan').innerText = (50 + (top * 0.65)).toFixed(2);
+            },
+
+            async saveExam() {
+                const d = { 
+                    username: this.user, 
+                    ad: document.getElementById('exam-name').value || 'İsimsiz Deneme', 
+                    tarih_kisa: new Date().toLocaleDateString('tr-TR'), 
+                    toplam_net: 0 
+                };
+                
+                subjects.forEach(s => {
+                    d[`${s.id}_d`] = +document.getElementById(`d-${s.id}`).value || 0;
+                    d[`${s.id}_y`] = +document.getElementById(`y-${s.id}`).value || 0;
+                    d[`${s.id}_net`] = Math.max(0, d[`${s.id}_d`] - (d[`${s.id}_y`] / 4));
+                    d.toplam_net += d[`${s.id}_net`];
+                });
+                
+                d.kpss_puan = 50 + (d.toplam_net * 0.65);
+                
+                const { data, error } = await sb.from('kpss_denemeler').insert([d]).select();
+                if(!error) { 
+                    this.toast("Deneme arşive eklendi!"); 
+                    this.exams.push(data[0]); 
+                    document.getElementById('exam-name').value = ''; 
+                    subjects.forEach(s => {
+                        document.getElementById(`d-${s.id}`).value = 0; 
+                        document.getElementById(`y-${s.id}`).value = 0;
+                    }); 
+                    this.calc(); 
+                } else {
+                    this.toast("Kayıt sırasında bir hata oluştu.");
+                }
+            },
+
+            renderHistory() {
+                let h = '';
+                [...this.exams].reverse().forEach(e => {
+                    let tags = subjects.map(s => `<span class="tag" style="color:${s.c}">${s.n}: ${e[`${s.id}_net`]}</span>`).join('');
+                    h += `
+                    <div class="exam-card" id="e-${e.id}">
+                        <button class="del-btn" onclick="app.del('${e.id}')">✕</button>
+                        <div>
+                            <div style="font-weight:800; font-size:18px; margin-bottom:4px;">${e.ad}</div>
+                            <div style="font-size:13px; color:var(--text-muted); font-weight:600;">Tarih: ${e.tarih_kisa}</div>
+                        </div>
+                        <div class="exam-nets">${tags}</div>
+                        <div style="display:flex; justify-content:space-between; border-top:1px solid var(--card-border); padding-top:16px; align-items:center;">
+                            <div style="font-size:13px; font-weight:700; color:var(--text-muted);">NET: <span style="font-size:18px; color:#fff;">${e.toplam_net.toFixed(2)}</span></div>
+                            <div style="font-size:13px; font-weight:700; color:var(--text-muted);">P10: <span style="font-size:18px; color:var(--success);">${e.kpss_puan.toFixed(2)}</span></div>
+                        </div>
+                    </div>`;
+                });
+                document.getElementById('history-list').innerHTML = h || '<p style="color:var(--text-muted); font-size:15px;">Henüz çözülmüş deneme bulunmuyor.</p>';
+            },
+
+            async del(id) {
+                if(!confirm("Denemeyi kalıcı olarak silmek istediğine emin misin?")) return;
+                await sb.from('kpss_denemeler').delete().eq('id', id);
+                this.exams = this.exams.filter(x => x.id !== id); 
+                this.renderHistory(); 
+                this.toast("Deneme silindi.");
+            },
+
+            renderAnalysis() {
+                if(!this.exams.length) return;
+                const last = this.exams[this.exams.length-1];
+                const max = Math.max(...this.exams.map(e => e.toplam_net));
+                const avg = this.exams.reduce((a,b) => a + b.toplam_net, 0) / this.exams.length;
+                
+                document.getElementById('a-last').innerText = last.toplam_net.toFixed(2);
+                document.getElementById('a-puan').innerText = last.kpss_puan.toFixed(2);
+                document.getElementById('a-max').innerText = max.toFixed(2);
+                document.getElementById('a-avg').innerText = avg.toFixed(2);
+            }
+        };
+
+        app.init();
+    </script>
 </body>
 </html>
