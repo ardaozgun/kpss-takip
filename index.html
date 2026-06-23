@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPSS Takip</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0f0d1a;color:#e8e6f0;min-height:100vh;display:flex}
+.sidebar{width:220px;min-width:220px;background:#1a1726;border-right:1px solid #2a2545;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10}
+.logo{padding:20px 18px 16px;font-size:20px;font-weight:600;color:#c084fc;border-bottom:1px solid #2a2545}
+.logo span{color:#fff}
+.nav{padding:12px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;font-size:13px;color:#8888aa;cursor:pointer;border-left:3px solid transparent;transition:.15s;user-select:none}
+.nav-item:hover{color:#ccc;background:rgba(192,132,252,.05)}
+.nav-item.active{color:#e8e6f0;background:rgba(192,132,252,.12);border-left-color:#c084fc}
+.sidebar-stats{padding:14px 18px;border-top:1px solid #2a2545}
+.sidebar-stats-title{font-size:10px;color:#555577;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.sidebar-progress-bar{height:4px;background:#2a2545;border-radius:2px;margin-bottom:6px}
+.sidebar-progress-fill{height:100%;background:#c084fc;border-radius:2px;transition:.4s}
+.sidebar-progress-text{font-size:11px;color:#c084fc}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#1a1726;border-bottom:1px solid #2a2545;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.topbar-title{font-size:15px;font-weight:500}
+.topbar-badge{background:rgba(192,132,252,.15);color:#c084fc;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500}
+.content{padding:20px 24px;flex:1}
+.page{display:none}.page.active{display:block}
+.folder{background:#1a1726;border:1px solid #2a2545;border-radius:12px;overflow:hidden;margin-bottom:10px}
+.folder-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.folder-header:hover{background:rgba(192,132,252,.05)}
+.folder-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.folder-name{font-size:14px;font-weight:500;flex:1}
+.folder-meta{font-size:12px;color:#8888aa;margin-right:6px}
+.folder-arrow{font-size:12px;color:#555577;transition:.2s;display:inline-block}
+.folder.open .folder-arrow{transform:rotate(180deg)}
+.folder-progress-wrap{padding:0 16px 10px}
+.folder-prog-bar{height:3px;background:#2a2545;border-radius:2px}
+.folder-prog-fill{height:100%;border-radius:2px;transition:.4s}
+.video-list{border-top:1px solid #2a2545;display:none}
+.folder.open .video-list{display:block}
+.video-item{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #1f1c30}
+.video-item:last-child{border-bottom:none}
+.video-item:hover{background:rgba(255,255,255,.02)}
+.video-check{width:20px;height:20px;border-radius:5px;border:1.5px solid #3a3560;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:.2s;cursor:pointer}
+.video-check.done{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.video-name{font-size:13px;flex:1;line-height:1.4}
+.video-name.done{text-decoration:line-through;color:#555577}
+.video-link{font-size:12px;color:#c084fc;text-decoration:none;padding:4px 8px;border-radius:6px;background:rgba(192,132,252,.1);white-space:nowrap;flex-shrink:0}
+.video-link:hover{background:rgba(192,132,252,.2)}
+.section-title{font-size:11px;font-weight:500;color:#8888aa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:#1a1726;border:1px solid #2a2545;border-radius:10px;padding:14px;text-align:center}
+.stat-val{font-size:26px;font-weight:600;margin-bottom:3px}
+.stat-lbl{font-size:11px;color:#8888aa}
+.deneme-form{background:#1a1726;border:1px solid #2a2545;border-radius:12px;padding:18px;margin-bottom:16px}
+.deneme-name-row{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.deneme-name-row label{font-size:13px;color:#8888aa;white-space:nowrap}
+.deneme-name-input{flex:1;background:#0f0d1a;border:1px solid #2a2545;border-radius:8px;padding:8px 12px;color:#e8e6f0;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:.2s}
+.deneme-name-input:focus{border-color:#7c3aed}
+.net-table{width:100%;border-collapse:collapse}
+.net-table th{font-size:11px;color:#555577;text-transform:uppercase;letter-spacing:.06em;padding:0 8px 10px;text-align:center;font-weight:500}
+.net-table th:first-child{text-align:left}
+.net-table td{padding:6px 8px}
+.net-table td:first-child{padding-left:0}
+.net-label-cell{font-size:13px;font-weight:500}
+.net-input{width:100%;background:#0f0d1a;border:1px solid #2a2545;border-radius:7px;padding:7px 10px;color:#e8e6f0;font-family:'Inter',sans-serif;font-size:14px;text-align:center;outline:none;transition:.2s}
+.net-input:focus{border-color:#7c3aed}
+.net-result{font-size:15px;font-weight:600;color:#c084fc;text-align:center}
+.toplam-row td{border-top:1px solid #2a2545;padding-top:12px}
+.btn-ekle{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 22px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;margin-top:8px}
+.btn-ekle:hover{background:#6d28d9}
+.gecmis-list{display:flex;flex-direction:column;gap:8px}
+.gecmis-item{background:#1a1726;border:1px solid #2a2545;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:16px}
+.gecmis-ad{font-size:14px;font-weight:500;flex:1}
+.gecmis-tarih{font-size:11px;color:#555577;margin-top:2px}
+.gecmis-net{font-size:22px;font-weight:600;color:#c084fc}
+.gecmis-net-lbl{font-size:10px;color:#8888aa;text-align:right}
+.gecmis-detay{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.gecmis-detay-item{font-size:11px;color:#8888aa;background:#0f0d1a;border-radius:5px;padding:3px 8px}
+.btn-sil{background:none;border:none;color:#3a3560;cursor:pointer;font-size:16px;padding:4px;transition:.15s}
+.btn-sil:hover{color:#ff4757}
+.empty-state{text-align:center;padding:40px 20px;color:#555577;font-size:14px;line-height:1.8}
+.analiz-card{background:#1a1726;border:1px solid #2a2545;border-radius:10px;padding:16px;margin-bottom:10px}
+.analiz-card-title{font-size:11px;color:#8888aa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.trend-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.trend-label{font-size:13px;color:#aaa}
+.trend-val{font-size:13px;font-weight:500}
+.trend-bar-wrap{height:3px;background:#2a2545;border-radius:2px;margin-bottom:10px}
+.trend-bar-fill{height:100%;border-radius:2px;background:#7c3aed;transition:.6s}
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1726;border:1px solid #7c3aed;border-radius:10px;padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:8px;z-index:999;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">KPSS<span>Takip</span></div>
+  <div class="nav">
+    <div class="nav-item active" onclick="showPage('videolar')">🎬 &nbsp;Video Takip</div>
+    <div class="nav-item" onclick="showPage('net')">🧮 &nbsp;Net Hesapla</div>
+    <div class="nav-item" onclick="showPage('gecmis')">📋 &nbsp;Deneme Geçmişi</div>
+    <div class="nav-item" onclick="showPage('analiz')">📊 &nbsp;Analiz</div>
+  </div>
+  <div class="sidebar-stats">
+    <div class="sidebar-stats-title">Genel İlerleme</div>
+    <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" id="sidebarFill" style="width:0%"></div></div>
+    <div class="sidebar-progress-text" id="sidebarText">0 / 0 video</div>
+  </div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Video Takip</div>
+    <div class="topbar-badge" id="topbarBadge"></div>
+  </div>
+  <div class="content">
+    <div class="page active" id="page-videolar"></div>
+    <div class="page" id="page-net">
+      <div class="section-title">Yeni Deneme Ekle</div>
+      <div class="deneme-form">
+        <div class="deneme-name-row">
+          <label>Deneme Adı</label>
+          <input class="deneme-name-input" id="deneAd" placeholder="Örn: Deneme 1, TYT Mart...">
+        </div>
+        <table class="net-table">
+          <thead><tr><th>Ders</th><th>Doğru</th><th>Yanlış</th><th>Net</th></tr></thead>
+          <tbody id="netTableBody"></tbody>
+          <tfoot><tr class="toplam-row">
+            <td><span style="font-size:13px;font-weight:600">TOPLAM</span></td>
+            <td></td><td></td>
+            <td class="net-result" id="toplamNet">—</td>
+          </tr></tfoot>
+        </table>
+        <button class="btn-ekle" onclick="deneEkle()">✓ Denemeyi Kaydet</button>
+      </div>
+    </div>
+    <div class="page" id="page-gecmis">
+      <div class="section-title">Deneme Geçmişi</div>
+      <div class="gecmis-list" id="gecmisList"></div>
+    </div>
+    <div class="page" id="page-analiz">
+      <div class="section-title">Performans Analizi</div>
+      <div class="stats-grid" id="analizStats"></div>
+      <div id="analizGrid"></div>
+    </div>
+  </div>
+</div>
+<script>
+const PLAYLISTS=[{id:'gy',ad:'Genel Yetenek',icon:'🧮',renk:'#7c3aed',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF',toplam:20},{id:'gk',ad:'Genel Kültür',icon:'🌍',renk:'#0891b2',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE',toplam:15},{id:'tr',ad:'Türkçe',icon:'📖',renk:'#059669',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn',toplam:18},{id:'mat',ad:'Matematik',icon:'📐',renk:'#dc2626',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK',toplam:22},{id:'tar',ad:'Tarih',icon:'🏛️',renk:'#d97706',url:'https://www.youtube.com/playlist?list=PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1',toplam:16}];
+PLAYLISTS.forEach(pl=>{pl.videolar=Array.from({length:pl.toplam},(_,i)=>({id:pl.id+'_'+i,ad:(i+1)+'. Ders — '+pl.ad+' '+(i+1),url:pl.url}))});
+function loadState(){try{return JSON.parse(localStorage.getItem('kpss_v')||'{}')}catch(e){return{}}}
+function saveState(s){localStorage.setItem('kpss_v',JSON.stringify(s))}
+function loadDenemeler(){try{return JSON.parse(localStorage.getItem('kpss_d')||'[]')}catch(e){return[]}}
+function saveDenemeler(d){localStorage.setItem('kpss_d',JSON.stringify(d))}
+let state=loadState(),denemeler=loadDenemeler(),currentPage='videolar';
+function showPage(p){currentPage=p;document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');const titles={videolar:'Video Takip',net:'Net Hesapla',gecmis:'Deneme Geçmişi',analiz:'Performans Analizi'};document.getElementById('topbarTitle').textContent=titles[p];const navs=['videolar','net','gecmis','analiz'];document.querySelectorAll('.nav-item')[navs.indexOf(p)].classList.add('active');if(p==='gecmis')renderGecmis();if(p==='analiz')renderAnaliz();updateBadge()}
+function renderVideolar(){const wrap=document.getElementById('page-videolar');wrap.innerHTML='';PLAYLISTS.forEach(pl=>{const tam=pl.videolar.filter(v=>state[v.id]).length;const pct=Math.round(tam/pl.videolar.length*100);const div=document.createElement('div');div.className='folder';div.id='folder_'+pl.id;div.innerHTML=`<div class="folder-header" onclick="toggleFolder('${pl.id}')"><div class="folder-icon" style="background:${pl.renk}22">${pl.icon}</div><div class="folder-name">${pl.ad}</div><div class="folder-meta" id="fmeta_${pl.id}">${tam}/${pl.videolar.length} tamamlandı</div><span class="folder-arrow" id="farrow_${pl.id}">▼</span></div><div class="folder-progress-wrap"><div class="folder-prog-bar"><div class="folder-prog-fill" id="fprog_${pl.id}" style="width:${pct}%;background:${pl.renk}"></div></div></div><div class="video-list" id="vlist_${pl.id}">${pl.videolar.map(v=>{const done=!!state[v.id];return`<div class="video-item"><div class="video-check ${done?'done':''}" id="chk_${v.id}" onclick="toggleVideo('${v.id}','${pl.id}')">${done?'✓':''}</div><div class="video-name ${done?'done':''}" id="vname_${v.id}">${v.ad}</div><a class="video-link" href="${v.url}" target="_blank">▶ İzle</a></div>`}).join('')}</div>`;wrap.appendChild(div)});updateSidebar();updateBadge()}
+function toggleFolder(id){document.getElementById('folder_'+id).classList.toggle('open')}
+function toggleVideo(vid,plid){state[vid]=!state[vid];saveState(state);const chk=document.getElementById('chk_'+vid);const nm=document.getElementById('vname_'+vid);if(state[vid]){chk.classList.add('done');chk.textContent='✓';nm.classList.add('done');showToast('✓ Video tamamlandı!')}else{chk.classList.remove('done');chk.textContent='';nm.classList.remove('done')}const pl=PLAYLISTS.find(p=>p.id===plid);const tam=pl.videolar.filter(v=>state[v.id]).length;const pct=Math.round(tam/pl.videolar.length*100);document.getElementById('fmeta_'+plid).textContent=tam+'/'+pl.videolar.length+' tamamlandı';document.getElementById('fprog_'+plid).style.width=pct+'%';updateSidebar();updateBadge()}
+function updateSidebar(){let total=0,done=0;PLAYLISTS.forEach(pl=>{total+=pl.videolar.length;done+=pl.videolar.filter(v=>state[v.id]).length});const pct=total?Math.round(done/total*100):0;document.getElementById('sidebarFill').style.width=pct+'%';document.getElementById('sidebarText').textContent=done+' / '+total+' video ('+pct+'%)'}
+function updateBadge(){const badge=document.getElementById('topbarBadge');if(currentPage==='videolar'){let total=0,done=0;PLAYLISTS.forEach(pl=>{total+=pl.videolar.length;done+=pl.videolar.filter(v=>state[v.id]).length});badge.textContent=done+' / '+total+' tamamlandı'}else if(currentPage==='gecmis'||currentPage==='analiz'){badge.textContent=denemeler.length+' deneme'}else badge.textContent=''}
+function renderNetTable(){document.getElementById('netTableBody').innerHTML=PLAYLISTS.map(pl=>`<tr><td class="net-label-cell">${pl.icon} ${pl.ad}</td><td><input class="net-input" type="number" id="d_${pl.id}" min="0" max="60" placeholder="0" oninput="hesaplaNet()"></td><td><input class="net-input" type="number" id="y_${pl.id}" min="0" max="60" placeholder="0" oninput="hesaplaNet()"></td><td class="net-result" id="n_${pl.id}">—</td></tr>`).join('')}
+function hesaplaNet(){let toplam=0;PLAYLISTS.forEach(pl=>{const d=parseFloat(document.getElementById('d_'+pl.id).value)||0;const y=parseFloat(document.getElementById('y_'+pl.id).value)||0;const net=Math.max(0,d-(y/4));document.getElementById('n_'+pl.id).textContent=net.toFixed(2);toplam+=net});document.getElementById('toplamNet').textContent=toplam.toFixed(2)}
+function deneEkle(){const ad=document.getElementById('deneAd').value.trim()||('Deneme '+(denemeler.length+1));const dersler={};let toplam=0;PLAYLISTS.forEach(pl=>{const d=parseFloat(document.getElementById('d_'+pl.id).value)||0;const y=parseFloat(document.getElementById('y_'+pl.id).value)||0;const net=Math.max(0,d-y/4);dersler[pl.id]={d,y,net,ad:pl.ad,icon:pl.icon};toplam+=net});denemeler.unshift({id:Date.now(),ad,tarih:new Date().toLocaleDateString('tr-TR'),dersler,toplam});saveDenemeler(denemeler);document.getElementById('deneAd').value='';PLAYLISTS.forEach(pl=>{document.getElementById('d_'+pl.id).value='';document.getElementById('y_'+pl.id).value='';document.getElementById('n_'+pl.id).textContent='—'});document.getElementById('toplamNet').textContent='—';showToast('✓ Deneme kaydedildi!');updateBadge()}
+function renderGecmis(){const list=document.getElementById('gecmisList');if(!denemeler.length){list.innerHTML='<div class="empty-state">Henüz deneme eklemedin.<br>Net Hesapla sayfasından ekleyebilirsin.</div>';return}list.innerHTML=denemeler.map((d,i)=>`<div class="gecmis-item"><div style="flex:1"><div style="display:flex;align-items:center;gap:10px"><div class="gecmis-ad">${d.ad}</div><div class="gecmis-tarih">${d.tarih}</div></div><div class="gecmis-detay">${Object.values(d.dersler).map(dr=>`<div class="gecmis-detay-item">${dr.icon} ${dr.net.toFixed(1)}</div>`).join('')}</div></div><div style="text-align:right"><div class="gecmis-net">${d.toplam.toFixed(2)}</div><div class="gecmis-net-lbl">toplam net</div></div><button class="btn-sil" onclick="silDeneme(${i})" title="Sil">✕</button></div>`).join('')}
+function silDeneme(i){if(!confirm('Bu denemeyi silmek istediğine emin misin?'))return;denemeler.splice(i,1);saveDenemeler(denemeler);renderGecmis();updateBadge()}
+function renderAnaliz(){if(!denemeler.length){document.getElementById('analizStats').innerHTML='<div class="empty-state" style="grid-column:1/-1">Henüz deneme eklemedin.</div>';document.getElementById('analizGrid').innerHTML='';return}const nets=denemeler.map(d=>d.toplam);const ort=nets.reduce((a,b)=>a+b,0)/nets.length;const en_yuksek=Math.max(...nets);const son=nets[0];document.getElementById('analizStats').innerHTML=`<div class="stat-card"><div class="stat-val" style="color:#c084fc">${son.toFixed(1)}</div><div class="stat-lbl">Son deneme</div></div><div class="stat-card"><div class="stat-val" style="color:#059669">${en_yuksek.toFixed(1)}</div><div class="stat-lbl">En yüksek net</div></div><div class="stat-card"><div class="stat-val" style="color:#8888aa">${ort.toFixed(1)}</div><div class="stat-lbl">Ortalama net</div></div>`;const dersOrts={};PLAYLISTS.forEach(pl=>{const vals=denemeler.map(d=>d.dersler[pl.id]?.net||0);dersOrts[pl.id]={ad:pl.ad,icon:pl.icon,ort:vals.reduce((a,b)=>a+b,0)/vals.length,renk:pl.renk}});const maxOrt=Math.max(...Object.values(dersOrts).map(d=>d.ort));document.getElementById('analizGrid').innerHTML=`<div class="analiz-card"><div class="analiz-card-title">Derse göre ortalama net</div>${Object.values(dersOrts).map(d=>`<div class="trend-row"><div class="trend-label">${d.icon} ${d.ad}</div><div class="trend-val" style="color:${d.renk}">${d.ort.toFixed(1)}</div></div><div class="trend-bar-wrap"><div class="trend-bar-fill" style="width:${maxOrt?d.ort/maxOrt*100:0}%;background:${d.renk}"></div></div>`).join('')}</div><div class="analiz-card"><div class="analiz-card-title">Son ${Math.min(denemeler.length,5)} deneme trendi</div>${[...denemeler].slice(0,5).reverse().map(d=>`<div class="trend-row"><div class="trend-label">${d.ad} <span style="font-size:11px;color:#444">${d.tarih}</span></div><div class="trend-val" style="color:#c084fc">${d.toplam.toFixed(1)}</div></div><div class="trend-bar-wrap"><div class="trend-bar-fill" style="width:${en_yuksek?d.toplam/en_yuksek*100:0}%"></div></div>`).join('')}</div>`}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.innerHTML='<span style="color:#c084fc">✦</span>'+msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500)}
+renderVideolar();renderNetTable();updateBadge();
+</script>
+</body>
+</html>
