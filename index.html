@@ -4,728 +4,384 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 KPSS / Takip Paneli</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #08070f;
-            --card: #111019;
-            --border: #2a2640;
-            --primary: #8b5cf6;
-            --primary-hover: #7c3aed;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --danger: #ef4444;
-            --turkce: #8b5cf6;
-            --matematik: #ef4444;
-            --tarih: #f59e0b;
-            --cografya: #10b981;
-            --vatandaslik: #3b82f6;
-            --radius: 12px;
-            --sidebar-width: 260px;
+            --bg: #08070f; --card: #111019; --border: #2a2640; 
+            --primary: #8b5cf6; --primary-hover: #7c3aed; 
+            --text-main: #f8fafc; --text-muted: #94a3b8; 
+            --danger: #ef4444; --success: #10b981;
+            --turkce: #8b5cf6; --matematik: #ef4444; --tarih: #f59e0b; --cografya: #10b981; --vatandaslik: #3b82f6;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg); color: var(--text-main); line-height: 1.5; overflow-x: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
         
-        button { cursor: pointer; border: none; outline: none; background: transparent; color: inherit; font-family: inherit; }
-        input { font-family: inherit; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 10px 14px; border-radius: 8px; outline: none; transition: border 0.2s; }
+        /* Ortak Sınıflar */
+        button { cursor: pointer; border: none; background: none; color: inherit; transition: 0.2s; }
+        input { background: transparent; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; outline: none; width: 100%; }
         input:focus { border-color: var(--primary); }
-        
-        .btn-primary { background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 500; transition: background 0.2s; }
+        .btn-primary { background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: 600; width: 100%; }
         .btn-primary:hover { background: var(--primary-hover); }
-
-        /* Login Screen */
-        #login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--bg); }
-        .login-card { background: var(--card); border: 1px solid var(--border); padding: 40px; border-radius: var(--radius); width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .login-card h1 { font-size: 24px; margin-bottom: 8px; }
-        .login-card p { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
-        .form-group { display: flex; flex-direction: column; text-align: left; margin-bottom: 16px; }
-        .form-group label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
-        .login-card .btn-primary { width: 100%; margin-top: 10px; padding: 12px; }
-
-        /* Main App Layout */
-        #app { display: none; height: 100vh; width: 100vw; }
         
+        /* Login */
+        #login-view { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 16px; border: 1px solid var(--border); width: 360px; text-align: center; }
+        .login-box h2 { margin-bottom: 24px; color: var(--primary); }
+        .login-box .input-group { margin-bottom: 16px; text-align: left; }
+        .login-box label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; }
+
         /* Sidebar */
-        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-width); background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px; z-index: 10; }
-        .brand { font-size: 18px; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
-        .brand span { color: var(--primary); }
-        
-        .nav-links { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: var(--text-muted); font-weight: 500; transition: all 0.2s; }
-        .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-main); }
+        .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px; }
+        .logo { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 40px; display: flex; align-items: center; gap: 8px; }
+        .nav-item { padding: 12px 16px; border-radius: 8px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .nav-item.active { background: rgba(139, 92, 246, 0.1); color: var(--primary); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; }
-
-        .sidebar-footer { margin-top: auto; padding-top: 24px; border-top: 1px solid var(--border); }
-        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .user-name { font-weight: 600; font-size: 14px; }
-        .logout-btn { color: var(--text-muted); font-size: 12px; text-decoration: underline; }
-        .logout-btn:hover { color: var(--danger); }
-        
-        .overall-progress { font-size: 12px; color: var(--text-muted); }
-        .progress-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
-        .progress-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; }
+        .logout { color: var(--danger); font-size: 12px; font-weight: 600; }
+        .progress-bar { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 6px; }
         .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
 
-        /* Content Area */
-        .content { margin-left: var(--sidebar-width); height: 100vh; overflow-y: auto; padding: 40px; }
-        .view { display: none; animation: fadeIn 0.3s ease; max-width: 1000px; margin: 0 auto; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .view-header { margin-bottom: 30px; }
-        .view-header h2 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
-        .view-header p { color: var(--text-muted); }
+        /* İçerik Alanı */
+        .main-content { flex: 1; overflow-y: auto; padding: 40px; }
+        .page { display: none; max-width: 900px; margin: 0 auto; animation: fadeIn 0.3s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 24px; margin-bottom: 8px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
 
         /* Video Takip */
-        .subject-folder { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
-        .folder-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
-        .folder-header:hover { background: rgba(255,255,255,0.02); }
-        .folder-title { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; }
-        .folder-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; width: 200px; }
-        .folder-stats-text { font-size: 13px; color: var(--text-muted); }
-        
-        .video-list { display: none; border-top: 1px solid var(--border); padding: 10px 0; background: rgba(0,0,0,0.2); }
-        .subject-folder.open .video-list { display: block; }
-        
-        .video-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
-        .video-item:last-child { border-bottom: none; }
-        .video-item:hover { background: rgba(255,255,255,0.03); }
-        .video-left { display: flex; align-items: center; gap: 16px; }
-        
-        .custom-checkbox { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-        .custom-checkbox.checked { border-color: currentColor; background-color: currentColor; }
-        .custom-checkbox.checked::after { content: '✓'; color: #fff; font-size: 14px; font-weight: bold; }
-        
-        .video-name { font-size: 15px; transition: all 0.2s; cursor: pointer; }
-        .video-item.completed .video-name { text-decoration: line-through; color: var(--text-muted); }
-        
-        .play-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-main); background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 6px; text-decoration: none; transition: background 0.2s; }
-        .play-btn:hover { background: rgba(255,255,255,0.1); }
+        .folder { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+        .folder-head { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .folder-head:hover { background: rgba(255,255,255,0.02); }
+        .folder-title { font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+        .video-list { display: none; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+        .folder.open .video-list { display: block; }
+        .video-row { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; }
+        .chk-box { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .video-row.done .chk-box { background: currentColor; border-color: currentColor; }
+        .video-row.done .chk-box::after { content: '✓'; color: #fff; font-size: 12px; }
+        .video-row.done span { text-decoration: line-through; color: var(--text-muted); }
+        .play-btn { font-size: 12px; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; text-decoration: none; color: #fff; }
 
         /* Net Hesapla */
-        .calc-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; }
-        .calc-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-        .calc-row:last-of-type { border-bottom: none; margin-bottom: 30px; }
-        .calc-header { font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase; }
-        .subject-label { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-        .calc-row input { width: 100%; text-align: center; }
-        .net-val { font-size: 18px; font-weight: 600; text-align: center; }
-        
-        .calc-results { background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.2); padding: 20px; border-radius: 8px; display: flex; justify-content: space-around; margin-bottom: 24px; }
-        .res-box { text-align: center; }
-        .res-title { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
-        .res-value { font-size: 28px; font-weight: 700; color: var(--primary); }
+        .calc-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: center; }
+        .calc-box { background: var(--card); padding: 30px; border-radius: 12px; border: 1px solid var(--border); }
+        .calc-grid input { text-align: center; }
+        .net-result { font-weight: 700; font-size: 16px; text-align: center; }
+        .total-box { display: flex; justify-content: space-around; background: rgba(139, 92, 246, 0.1); padding: 20px; border-radius: 12px; margin: 24px 0; }
+        .total-item { text-align: center; }
+        .total-item span { font-size: 12px; color: var(--text-muted); }
+        .total-item div { font-size: 24px; font-weight: 700; color: var(--primary); }
 
-        /* Deneme Geçmişi */
-        .exams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .exam-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; position: relative; transition: transform 0.2s; }
-        .exam-card:hover { transform: translateY(-3px); border-color: rgba(139, 92, 246, 0.4); }
-        .exam-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
-        .exam-name { font-weight: 600; font-size: 16px; }
-        .exam-date { font-size: 12px; color: var(--text-muted); }
-        .exam-delete { position: absolute; top: 16px; right: 16px; color: var(--text-muted); cursor: pointer; transition: color 0.2s; font-size: 18px; }
-        .exam-delete:hover { color: var(--danger); }
+        /* Geçmiş & Analiz */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .exam-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; }
+        .del-btn { position: absolute; top: 16px; right: 16px; color: var(--text-muted); }
+        .del-btn:hover { color: var(--danger); }
+        .exam-nets { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+        .tag { font-size: 10px; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); }
         
-        .exam-nets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-        .net-tag { font-size: 11px; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-        
-        .exam-footer { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 16px; }
-        .exam-score { display: flex; flex-direction: column; }
-        .score-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-        .score-val { font-size: 18px; font-weight: 700; color: #fff; }
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+        .stat-card span { font-size: 12px; color: var(--text-muted); }
+        .stat-card div { font-size: 24px; font-weight: 700; margin-top: 8px; }
 
-        /* Analiz */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
-        .stat-card h4 { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; }
-        .stat-card .val { font-size: 28px; font-weight: 700; }
+        .hbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .hbar-label { width: 80px; font-size: 12px; color: var(--text-muted); }
+        .hbar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .hbar-fill { height: 100%; border-radius: 4px; }
         
-        .charts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
-        .chart-title { font-size: 16px; font-weight: 600; margin-bottom: 24px; }
-        
-        /* H-Bar Chart */
-        .hbar-row { display: flex; align-items: center; margin-bottom: 16px; gap: 12px; }
-        .hbar-label { width: 80px; font-size: 13px; color: var(--text-muted); }
-        .hbar-track { flex: 1; height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; }
-        .hbar-fill { height: 100%; border-radius: 6px; width: 0%; transition: width 1s ease-out; }
-        .hbar-val { width: 40px; text-align: right; font-size: 13px; font-weight: 600; }
-        
-        /* V-Bar Chart */
-        .vbar-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 200px; padding-top: 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
-        .vbar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 40px; }
-        .vbar-track { width: 30px; height: 100%; display: flex; align-items: flex-end; background: rgba(255,255,255,0.02); border-radius: 4px 4px 0 0; }
-        .vbar-fill { width: 100%; background: var(--primary); border-radius: 4px 4px 0 0; height: 0%; transition: height 1s ease-out; position: relative; }
-        .vbar-fill span { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 600; }
-        .vbar-label { font-size: 11px; color: var(--text-muted); transform: rotate(-45deg); margin-top: 10px; white-space: nowrap; }
-
-        /* Toast */
-        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--primary); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease 2.2s forwards; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
-        /* Empty States */
-        .empty-state { padding: 40px; text-align: center; color: var(--text-muted); font-size: 15px; }
+        #toast { position: fixed; bottom: 20px; right: 20px; background: var(--primary); padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; display: none; z-index: 100; }
     </style>
 </head>
 <body>
 
-    <!-- Login Screen -->
-    <div id="login-screen">
-        <div class="login-card">
-            <h1>Hoş Geldin!</h1>
-            <p>2026 KPSS Hazırlık ve Takip Paneli</p>
-            <form id="login-form">
-                <div class="form-group">
-                    <label>Kullanıcı Adı</label>
-                    <input type="text" id="login-username" required placeholder="Adınızı girin..." autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label>Şifre</label>
-                    <input type="password" id="login-password" required placeholder="Şifre: 1234">
-                </div>
-                <button type="submit" class="btn-primary" id="login-btn">Giriş Yap</button>
-            </form>
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-view">
+        <div class="login-box">
+            <h2>KPSS 2026</h2>
+            <div class="input-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="username" placeholder="Adınız...">
+            </div>
+            <div class="input-group">
+                <label>Şifre</label>
+                <input type="password" id="password" placeholder="1234">
+            </div>
+            <button class="btn-primary" onclick="app.login()">Giriş Yap</button>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="app">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand"><span>✦</span> KPSS 2026</div>
-            <div class="nav-links">
-                <button class="nav-item active" data-view="view-videos">🎬 Video Takip</button>
-                <button class="nav-item" data-view="view-calculator">🧮 Net Hesapla</button>
-                <button class="nav-item" data-view="view-history">📋 Deneme Geçmişi</button>
-                <button class="nav-item" data-view="view-analysis">📊 Analiz</button>
+    <!-- SİDEBAR -->
+    <aside class="sidebar" id="sidebar" style="display:none;">
+        <div class="logo"><span style="color:var(--primary)">✦</span> KPSS Takip</div>
+        <button class="nav-item active" onclick="app.nav('videos')">🎬 Video Takip</button>
+        <button class="nav-item" onclick="app.nav('calc')">🧮 Net Hesapla</button>
+        <button class="nav-item" onclick="app.nav('history')">📋 Deneme Geçmişi</button>
+        <button class="nav-item" onclick="app.nav('analysis')">📊 Analiz</button>
+        
+        <div class="sidebar-footer">
+            <div class="user-row">
+                <strong id="user-display"></strong>
+                <button class="logout" onclick="app.logout()">Çıkış</button>
             </div>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <span class="user-name" id="display-username">Kullanıcı</span>
-                    <button class="logout-btn" onclick="logout()">Çıkış</button>
-                </div>
-                <div class="overall-progress">
-                    <div class="progress-header">
-                        <span>Genel İlerleme</span>
-                        <span id="sb-progress-txt">0/269</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill" id="sb-progress-bar"></div>
-                    </div>
-                </div>
+            <div style="font-size: 11px; color: var(--text-muted); display:flex; justify-content:space-between;">
+                <span>Genel İlerleme</span><span id="prog-text">0/269</span>
             </div>
-        </aside>
+            <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+        </div>
+    </aside>
 
-        <!-- Content -->
-        <main class="content">
-            
-            <!-- VIEW: VIDEO TAKIP -->
-            <div id="view-videos" class="view active">
-                <div class="view-header">
-                    <h2>Video Takip Listesi</h2>
-                    <p>Ders videolarını izledikçe işaretle, ilerlemeni kaydet.</p>
-                </div>
-                <div id="folders-container"></div>
+    <!-- İÇERİK -->
+    <main class="main-content" id="main" style="display:none;">
+        
+        <!-- VİDEOLAR -->
+        <div id="videos" class="page active">
+            <div class="page-header">
+                <h1>Video Takip Listesi</h1><p>İzlediğin videoları işaretle.</p>
             </div>
+            <div id="folder-container"></div>
+        </div>
 
-            <!-- VIEW: NET HESAPLA -->
-            <div id="view-calculator" class="view">
-                <div class="view-header">
-                    <h2>Deneme Net Hesaplama</h2>
-                    <p>Deneme sonuçlarını gir, P10 puanını öğren ve geçmişe kaydet.</p>
-                </div>
-                <div class="calc-card">
-                    <div class="form-group" style="margin-bottom: 24px;">
-                        <label>Deneme Adı</label>
-                        <input type="text" id="calc-name" placeholder="Örn: Benim Hocam TG-1" style="max-width: 400px;">
-                    </div>
-                    
-                    <div class="calc-row calc-header">
-                        <div>Ders Adı</div>
-                        <div style="text-align: center">Doğru</div>
-                        <div style="text-align: center">Yanlış</div>
-                        <div style="text-align: center">Net</div>
-                    </div>
-                    
-                    <div id="calc-inputs-container"></div>
-
-                    <div class="calc-results">
-                        <div class="res-box">
-                            <div class="res-title">Toplam Net</div>
-                            <div class="res-value" id="calc-res-net">0.00</div>
-                        </div>
-                        <div class="res-box">
-                            <div class="res-title">Tahmini P10 Puanı</div>
-                            <div class="res-value" id="calc-res-score" style="color: #10b981">50.00</div>
-                        </div>
-                    </div>
-                    
-                    <button class="btn-primary" onclick="saveExam()" style="width: 100%;">✓ Denemeyi Kaydet</button>
-                </div>
+        <!-- NET HESAPLA -->
+        <div id="calc" class="page">
+            <div class="page-header">
+                <h1>Net Hesapla</h1><p>Deneme sonuçlarını girip kaydet.</p>
             </div>
-
-            <!-- VIEW: DENEME GECMISI -->
-            <div id="view-history" class="view">
-                <div class="view-header">
-                    <h2>Deneme Geçmişi</h2>
-                    <p>Bugüne kadar çözdüğün tüm denemeler ve sonuçları.</p>
+            <div class="calc-box">
+                <input type="text" id="exam-name" placeholder="Deneme Adı (Örn: TG-1)" style="margin-bottom: 20px;">
+                <div class="calc-grid" style="color:var(--text-muted); font-size:12px; font-weight:600;">
+                    <div>DERS</div><div style="text-align:center">DOĞRU</div><div style="text-align:center">YANLIŞ</div><div style="text-align:center">NET</div>
                 </div>
-                <div id="history-container" class="exams-grid"></div>
+                <div id="calc-inputs"></div>
+                <div class="total-box">
+                    <div class="total-item"><span>Toplam Net</span><div id="res-net">0.00</div></div>
+                    <div class="total-item"><span>Tahmini P10</span><div id="res-puan" style="color:var(--success)">50.00</div></div>
+                </div>
+                <button class="btn-primary" onclick="app.saveExam()">✓ Denemeyi Kaydet</button>
             </div>
+        </div>
 
-            <!-- VIEW: ANALIZ -->
-            <div id="view-analysis" class="view">
-                <div class="view-header">
-                    <h2>Performans Analizi</h2>
-                    <p>Deneme sonuçlarına göre güncel durumun ve istatistiklerin.</p>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h4>Son Deneme Neti</h4>
-                        <div class="val" id="stat-last-net">-</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Son KPSS Puanı</h4>
-                        <div class="val" id="stat-last-score" style="color: #10b981">-</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>En Yüksek Net</h4>
-                        <div class="val" id="stat-max-net" style="color: var(--primary)">-</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Ortalama Net</h4>
-                        <div class="val" id="stat-avg-net">-</div>
-                    </div>
-                </div>
-
-                <div class="charts-container">
-                    <div class="chart-box">
-                        <div class="chart-title">Derslere Göre Ortalama Net</div>
-                        <div id="chart-avg-subjects"></div>
-                    </div>
-                    <div class="chart-box">
-                        <div class="chart-title">Son 6 Deneme Trendi (Net)</div>
-                        <div class="vbar-chart" id="chart-trend"></div>
-                    </div>
-                </div>
+        <!-- GEÇMİŞ -->
+        <div id="history" class="page">
+            <div class="page-header">
+                <h1>Deneme Geçmişi</h1><p>Kaydedilen tüm denemeleriniz.</p>
             </div>
+            <div class="card-grid" id="history-list"></div>
+        </div>
 
-        </main>
-    </div>
+        <!-- ANALİZ -->
+        <div id="analysis" class="page">
+            <div class="page-header">
+                <h1>Analiz</h1><p>Genel durum ve istatistikler.</p>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-card"><span>Son Net</span><div id="a-last">-</div></div>
+                <div class="stat-card"><span>Son Puan</span><div id="a-puan" style="color:var(--success)">-</div></div>
+                <div class="stat-card"><span>En Yüksek</span><div id="a-max" style="color:var(--primary)">-</div></div>
+                <div class="stat-card"><span>Ortalama</span><div id="a-avg">-</div></div>
+            </div>
+            <div class="calc-box">
+                <h3 style="margin-bottom: 20px; font-size: 16px;">Ders Ortalamaları</h3>
+                <div id="a-bars"></div>
+            </div>
+        </div>
+    </main>
 
-    <div id="toast-container"></div>
+    <div id="toast"></div>
 
     <script>
-        // Supabase Initialization
-        const SUPABASE_URL = 'https://rovzbxstktopuewlyobo.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdnpieHN0a3RvcHVld2x5b2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjMxODMsImV4cCI6MjA5NzczOTE4M30.6mm2V4H4sNTEeRacV-sTygesF3VV0Q1GG68lYwAzsYg';
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const sb = supabase.createClient(
+            'https://rovzbxstktopuewlyobo.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdnpieHN0a3RvcHVld2x5b2JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjMxODMsImV4cCI6MjA5NzczOTE4M30.6mm2V4H4sNTEeRacV-sTygesF3VV0Q1GG68lYwAzsYg'
+        );
 
-        // State Data
-        let currentUser = null;
-        let userProgress = new Set();
-        let userExams = [];
-
-        // Syllabus Data
         const subjects = [
-            { id: 'turkce', name: 'Türkçe', icon: '📖', color: 'var(--turkce)', count: 46, playlist: 'PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn', qs: 30 },
-            { id: 'matematik', name: 'Matematik', icon: '📐', color: 'var(--matematik)', count: 81, playlist: 'PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1', qs: 30 },
-            { id: 'tarih', name: 'Tarih', icon: '🏛️', color: 'var(--tarih)', count: 60, playlist: 'PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF', qs: 15 },
-            { id: 'cografya', name: 'Coğrafya', icon: '🌍', color: 'var(--cografya)', count: 34, playlist: 'PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK', qs: 10 },
-            { id: 'vatandaslik', name: 'Vatandaşlık', icon: '⚖️', color: 'var(--vatandaslik)', count: 48, playlist: 'PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE', qs: 15 }
+            { id: 'turkce', n: 'Türkçe', c: 'var(--turkce)', cnt: 46, pl: 'PL5kIOunpmSBMBPYmrPkd0JikOPIfQW-Sn', q: 30 },
+            { id: 'matematik', n: 'Matematik', c: 'var(--matematik)', cnt: 81, pl: 'PL5kIOunpmSBO_M_fUe9fHP1NFPCZRkrw1', q: 30 },
+            { id: 'tarih', n: 'Tarih', c: 'var(--tarih)', cnt: 60, pl: 'PL5kIOunpmSBM_vApgXxIQZx5PnegGbWFF', q: 15 },
+            { id: 'cografya', n: 'Coğrafya', c: 'var(--cografya)', cnt: 34, pl: 'PL5kIOunpmSBOBDQbSpgzjR8PgClHVmxgK', q: 10 },
+            { id: 'vatandaslik', n: 'Vatandaşlık', c: 'var(--vatandaslik)', cnt: 48, pl: 'PL5kIOunpmSBO2LLEQwCB9pJFT87wJsVSE', q: 15 }
         ];
 
-        const totalVideos = subjects.reduce((sum, s) => sum + s.count, 0);
+        const app = {
+            user: null, prog: new Set(), exams: [], totalV: 269,
 
-        // UI Helpers
-        function showToast(msg) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
-        }
+            async init() {
+                const u = localStorage.getItem('kpss_user');
+                if (u) await this.doLogin(u);
+                this.renderCalc();
+            },
 
-        function switchView(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            document.querySelector(`[data-view="${viewId}"]`).classList.add('active');
-            
-            if(viewId === 'view-history') renderHistory();
-            if(viewId === 'view-analysis') renderAnalysis();
-        }
+            async login() {
+                const u = document.getElementById('username').value.trim();
+                if (document.getElementById('password').value !== '1234') return alert("Şifre: 1234");
+                if (u) await this.doLogin(u);
+            },
 
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', (e) => switchView(e.target.dataset.view));
-        });
+            async doLogin(u) {
+                this.user = u; localStorage.setItem('kpss_user', u);
+                document.getElementById('user-display').innerText = u;
+                document.getElementById('login-view').style.display = 'none';
+                document.getElementById('sidebar').style.display = 'flex';
+                document.getElementById('main').style.display = 'block';
+                this.toast("Hoş geldin!");
+                await this.loadData();
+            },
 
-        // App Init & Auth
-        async function init() {
-            const stored = localStorage.getItem('kpss_user');
-            if(stored) {
-                await login(stored, '1234', true);
-            }
-        }
+            logout() {
+                localStorage.removeItem('kpss_user'); location.reload();
+            },
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const u = document.getElementById('login-username').value.trim();
-            const p = document.getElementById('login-password').value;
-            if(p !== '1234') {
-                alert("Şifre hatalı! Lütfen '1234' giriniz.");
-                return;
-            }
-            if(!u) return;
-            const btn = document.getElementById('login-btn');
-            btn.innerText = "Yükleniyor...";
-            await login(u, p, false);
-            btn.innerText = "Giriş Yap";
-        });
+            toast(msg) {
+                const t = document.getElementById('toast');
+                t.innerText = msg; t.style.display = 'block';
+                setTimeout(() => t.style.display = 'none', 2500);
+            },
 
-        async function login(username, pass, isAuto) {
-            currentUser = username;
-            localStorage.setItem('kpss_user', username);
-            document.getElementById('display-username').innerText = username;
-            
-            await loadUserData();
-            
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            
-            buildVideosUI();
-            buildCalcUI();
-            updateOverallProgress();
-            
-            if(!isAuto) showToast('Giriş başarılı!');
-        }
+            nav(id) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+                event.target.classList.add('active');
+                if(id === 'history') this.renderHistory();
+                if(id === 'analysis') this.renderAnalysis();
+            },
 
-        function logout() {
-            localStorage.removeItem('kpss_user');
-            currentUser = null;
-            userProgress.clear();
-            userExams = [];
-            document.getElementById('app').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-        }
+            async loadData() {
+                const [pRes, eRes] = await Promise.all([
+                    sb.from('kpss_progress').select('video_id').eq('username', this.user).eq('completed', true),
+                    sb.from('kpss_denemeler').select('*').eq('username', this.user).order('created_at')
+                ]);
+                this.prog = new Set(pRes.data?.map(d => d.video_id) || []);
+                this.exams = eRes.data || [];
+                this.renderVideos(); this.updateP();
+            },
 
-        // Data Loading
-        async function loadUserData() {
-            userProgress.clear();
-            
-            // Load progress
-            const { data: pData } = await sb.from('kpss_progress').select('video_id, completed').eq('username', currentUser);
-            if(pData) {
-                pData.forEach(p => { if(p.completed) userProgress.add(p.video_id) });
-            }
-
-            // Load exams
-            const { data: eData } = await sb.from('kpss_denemeler').select('*').eq('username', currentUser).order('created_at', { ascending: true });
-            if(eData) userExams = eData;
-        }
-
-        // Video UI
-        function buildVideosUI() {
-            const container = document.getElementById('folders-container');
-            container.innerHTML = '';
-            
-            subjects.forEach(sub => {
-                let completedCount = 0;
-                for(let i=1; i<=sub.count; i++){
-                    if(userProgress.has(`${sub.id}_${i}`)) completedCount++;
-                }
-
-                const folder = document.createElement('div');
-                folder.className = 'subject-folder';
-                folder.innerHTML = `
-                    <div class="folder-header" style="color: ${sub.color}" onclick="this.parentElement.classList.toggle('open')">
-                        <div class="folder-title">${sub.icon} ${sub.name}</div>
-                        <div class="folder-stats">
-                            <div class="folder-stats-text"><span id="count-${sub.id}">${completedCount}</span> / ${sub.count} Tamamlandı</div>
-                            <div class="progress-track" style="width: 100%">
-                                <div class="progress-fill" id="bar-${sub.id}" style="width: ${(completedCount/sub.count)*100}%; background: ${sub.color}"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-list" id="list-${sub.id}"></div>
-                `;
-                container.appendChild(folder);
-
-                const list = document.getElementById(`list-${sub.id}`);
-                let listHTML = '';
-                for(let i=1; i<=sub.count; i++){
-                    const vId = `${sub.id}_${i}`;
-                    const isComp = userProgress.has(vId);
-                    listHTML += `
-                        <div class="video-item ${isComp ? 'completed' : ''}" id="item-${vId}">
-                            <div class="video-left">
-                                <div class="custom-checkbox ${isComp ? 'checked' : ''}" style="color: ${sub.color}" onclick="toggleVideo('${sub.id}', ${i})"></div>
-                                <div class="video-name" onclick="toggleVideo('${sub.id}', ${i})">${i}. Ders</div>
-                            </div>
-                            <a href="https://www.youtube.com/watch?list=${sub.playlist}&index=${i}" target="_blank" class="play-btn">▶ İzle</a>
-                        </div>
-                    `;
-                }
-                list.innerHTML = listHTML;
-            });
-        }
-
-        async function toggleVideo(subId, index) {
-            const vId = `${subId}_${index}`;
-            const item = document.getElementById(`item-${vId}`);
-            const cb = item.querySelector('.custom-checkbox');
-            const isCompleted = userProgress.has(vId);
-            
-            const newState = !isCompleted;
-            
-            if(newState) {
-                userProgress.add(vId);
-                item.classList.add('completed');
-                cb.classList.add('checked');
-            } else {
-                userProgress.delete(vId);
-                item.classList.remove('completed');
-                cb.classList.remove('checked');
-            }
-
-            updateFolderProgress(subId);
-            updateOverallProgress();
-
-            // Supabase sync
-            try {
-                await sb.from('kpss_progress').upsert({
-                    username: currentUser,
-                    video_id: vId,
-                    completed: newState
-                }, { onConflict: 'username,video_id' });
-            } catch(e) { console.error(e); }
-        }
-
-        function updateFolderProgress(subId) {
-            const sub = subjects.find(s => s.id === subId);
-            let c = 0;
-            for(let i=1; i<=sub.count; i++) if(userProgress.has(`${sub.id}_${i}`)) c++;
-            
-            document.getElementById(`count-${subId}`).innerText = c;
-            document.getElementById(`bar-${subId}`).style.width = `${(c/sub.count)*100}%`;
-        }
-
-        function updateOverallProgress() {
-            const count = userProgress.size;
-            document.getElementById('sb-progress-txt').innerText = `${count}/${totalVideos}`;
-            document.getElementById('sb-progress-bar').style.width = `${(count/totalVideos)*100}%`;
-        }
-
-        // Calc UI
-        function buildCalcUI() {
-            const cont = document.getElementById('calc-inputs-container');
-            cont.innerHTML = '';
-            
-            subjects.forEach(sub => {
-                cont.innerHTML += `
-                    <div class="calc-row">
-                        <div class="subject-label" style="color: ${sub.color}">${sub.icon} ${sub.name} <span style="font-size:11px; color:#94a3b8">(${sub.qs}S)</span></div>
-                        <input type="number" id="d-${sub.id}" min="0" max="${sub.qs}" value="0" oninput="calcPreview()">
-                        <input type="number" id="y-${sub.id}" min="0" max="${sub.qs}" value="0" oninput="calcPreview()">
-                        <div class="net-val" id="net-${sub.id}">0.00</div>
-                    </div>
-                `;
-            });
-        }
-
-        function calcPreview() {
-            let topNet = 0;
-            subjects.forEach(sub => {
-                let d = parseInt(document.getElementById(`d-${sub.id}`).value) || 0;
-                let y = parseInt(document.getElementById(`y-${sub.id}`).value) || 0;
-                if(d + y > sub.qs) { y = sub.qs - d; document.getElementById(`y-${sub.id}`).value = y; }
-                let net = d - (y / 4);
-                if(net < 0) net = 0;
-                document.getElementById(`net-${sub.id}`).innerText = net.toFixed(2);
-                topNet += net;
-            });
-            
-            document.getElementById('calc-res-net').innerText = topNet.toFixed(2);
-            let kpss = 50 + (topNet * 0.65);
-            document.getElementById('calc-res-score').innerText = kpss.toFixed(2);
-        }
-
-        async function saveExam() {
-            const name = document.getElementById('calc-name').value.trim() || 'İsimsiz Deneme';
-            
-            let data = {
-                username: currentUser,
-                ad: name,
-                tarih_kisa: new Date().toLocaleDateString('tr-TR'),
-                toplam_net: 0,
-                kpss_puan: 0
-            };
-            
-            subjects.forEach(sub => {
-                let d = parseInt(document.getElementById(`d-${sub.id}`).value) || 0;
-                let y = parseInt(document.getElementById(`y-${sub.id}`).value) || 0;
-                let net = d - (y / 4);
-                if(net < 0) net = 0;
-                
-                data[`${sub.id}_d`] = d;
-                data[`${sub.id}_y`] = y;
-                data[`${sub.id}_net`] = parseFloat(net.toFixed(2));
-                data.toplam_net += net;
-            });
-            
-            data.toplam_net = parseFloat(data.toplam_net.toFixed(2));
-            data.kpss_puan = parseFloat((50 + (data.toplam_net * 0.65)).toFixed(2));
-
-            const { data: resData, error } = await sb.from('kpss_denemeler').insert([data]).select();
-            
-            if(error) {
-                alert("Kaydedilirken hata oluştu!");
-                console.error(error);
-            } else {
-                showToast("Deneme başarıyla kaydedildi!");
-                userExams.push(resData[0]);
-                document.getElementById('calc-name').value = '';
-                subjects.forEach(sub => {
-                    document.getElementById(`d-${sub.id}`).value = '0';
-                    document.getElementById(`y-${sub.id}`).value = '0';
-                });
-                calcPreview();
-            }
-        }
-
-        // History UI
-        function renderHistory() {
-            const cont = document.getElementById('history-container');
-            if(userExams.length === 0) {
-                cont.innerHTML = `<div class="empty-state">Henüz kaydedilmiş bir deneme yok.</div>`;
-                return;
-            }
-            
-            // Reverse to show latest first
-            const list = [...userExams].reverse();
-            
-            let html = '';
-            list.forEach(ex => {
-                let netsHtml = '';
+            renderVideos() {
+                let h = '';
                 subjects.forEach(s => {
-                    netsHtml += `<span class="net-tag" style="color:${s.color}; border-color:${s.color}40">${s.name}: ${ex[`${s.id}_net`]}</span>`;
+                    let c = 0; for(let i=1;i<=s.cnt;i++) if(this.prog.has(`${s.id}_${i}`)) c++;
+                    h += `<div class="folder">
+                        <div class="folder-head" style="color:${s.c}" onclick="this.parentElement.classList.toggle('open')">
+                            <div class="folder-title">${s.n}</div>
+                            <div style="font-size:12px; color:var(--text-muted)">
+                                <span id="c-${s.id}">${c}</span>/${s.cnt}
+                                <div class="progress-bar" style="width:100px"><div class="progress-fill" id="b-${s.id}" style="width:${(c/s.cnt)*100}%; background:${s.c}"></div></div>
+                            </div>
+                        </div>
+                        <div class="video-list">`;
+                    for(let i=1; i<=s.cnt; i++) {
+                        const vId = `${s.id}_${i}`, done = this.prog.has(vId);
+                        h += `<div class="video-row ${done?'done':''}" id="r-${vId}">
+                            <div style="display:flex; align-items:center; gap:12px; cursor:pointer" onclick="app.tog('${s.id}',${i})">
+                                <div class="chk-box" style="color:${s.c}"></div><span style="font-size:14px">${i}. Ders</span>
+                            </div>
+                            <a href="https://www.youtube.com/watch?list=${s.pl}&index=${i}" target="_blank" class="play-btn">▶ İzle</a>
+                        </div>`;
+                    }
+                    h += `</div></div>`;
                 });
+                document.getElementById('folder-container').innerHTML = h;
+            },
 
-                html += `
-                    <div class="exam-card" id="ex-${ex.id}">
-                        <div class="exam-delete" onclick="deleteExam('${ex.id}')">✕</div>
-                        <div class="exam-header">
-                            <div>
-                                <div class="exam-name">${ex.ad}</div>
-                                <div class="exam-date">${ex.tarih_kisa}</div>
-                            </div>
+            async tog(sId, i) {
+                const vId = `${sId}_${i}`, row = document.getElementById(`r-${vId}`), isDone = !this.prog.has(vId);
+                isDone ? this.prog.add(vId) : this.prog.delete(vId);
+                row.classList.toggle('done', isDone);
+                this.updateP();
+                let c = 0; for(let j=1;j<=subjects.find(x=>x.id==sId).cnt;j++) if(this.prog.has(`${sId}_${j}`)) c++;
+                document.getElementById(`c-${sId}`).innerText = c;
+                document.getElementById(`b-${sId}`).style.width = `${(c/subjects.find(x=>x.id==sId).cnt)*100}%`;
+                await sb.from('kpss_progress').upsert({ username: this.user, video_id: vId, completed: isDone }, { onConflict: 'username,video_id' });
+            },
+
+            updateP() {
+                const cnt = this.prog.size;
+                document.getElementById('prog-text').innerText = `${cnt}/${this.totalV}`;
+                document.getElementById('prog-fill').style.width = `${(cnt/this.totalV)*100}%`;
+            },
+
+            renderCalc() {
+                let h = '';
+                subjects.forEach(s => {
+                    h += `<div class="calc-grid">
+                        <div style="color:${s.c}; font-weight:600; font-size:14px">${s.n} <span style="color:#666; font-size:10px">(${s.q})</span></div>
+                        <input type="number" id="d-${s.id}" min="0" max="${s.q}" value="0" oninput="app.calc()">
+                        <input type="number" id="y-${s.id}" min="0" max="${s.q}" value="0" oninput="app.calc()">
+                        <div class="net-result" id="n-${s.id}">0.00</div>
+                    </div>`;
+                });
+                document.getElementById('calc-inputs').innerHTML = h;
+            },
+
+            calc() {
+                let top = 0;
+                subjects.forEach(s => {
+                    let d = +document.getElementById(`d-${s.id}`).value || 0, y = +document.getElementById(`y-${s.id}`).value || 0;
+                    if(d+y>s.q){ y=s.q-d; document.getElementById(`y-${s.id}`).value=y; }
+                    let net = Math.max(0, d-(y/4));
+                    document.getElementById(`n-${s.id}`).innerText = net.toFixed(2); top += net;
+                });
+                document.getElementById('res-net').innerText = top.toFixed(2);
+                document.getElementById('res-puan').innerText = (50+(top*0.65)).toFixed(2);
+            },
+
+            async saveExam() {
+                const d = { username: this.user, ad: document.getElementById('exam-name').value || 'İsimsiz', tarih_kisa: new Date().toLocaleDateString('tr-TR'), toplam_net:0 };
+                subjects.forEach(s => {
+                    d[`${s.id}_d`] = +document.getElementById(`d-${s.id}`).value || 0;
+                    d[`${s.id}_y`] = +document.getElementById(`y-${s.id}`).value || 0;
+                    d[`${s.id}_net`] = Math.max(0, d[`${s.id}_d`] - (d[`${s.id}_y`]/4));
+                    d.toplam_net += d[`${s.id}_net`];
+                });
+                d.kpss_puan = 50 + (d.toplam_net * 0.65);
+                const { data, error } = await sb.from('kpss_denemeler').insert([d]).select();
+                if(!error) { this.toast("Kaydedildi!"); this.exams.push(data[0]); document.getElementById('exam-name').value=''; subjects.forEach(s=>{document.getElementById(`d-${s.id}`).value=0; document.getElementById(`y-${s.id}`).value=0;}); this.calc(); }
+            },
+
+            renderHistory() {
+                let h = '';
+                [...this.exams].reverse().forEach(e => {
+                    let tags = subjects.map(s => `<span class="tag" style="color:${s.c}">${s.n}: ${e[`${s.id}_net`]}</span>`).join('');
+                    h += `<div class="exam-card" id="e-${e.id}">
+                        <button class="del-btn" onclick="app.del('${e.id}')">✕</button>
+                        <div style="font-weight:600">${e.ad}</div><div style="font-size:12px; color:var(--text-muted)">${e.tarih_kisa}</div>
+                        <div class="exam-nets">${tags}</div>
+                        <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:12px; margin-top:12px; font-weight:700">
+                            <span>Net: ${e.toplam_net.toFixed(2)}</span><span style="color:var(--success)">Puan: ${e.kpss_puan.toFixed(2)}</span>
                         </div>
-                        <div class="exam-nets">${netsHtml}</div>
-                        <div class="exam-footer">
-                            <div class="exam-score">
-                                <span class="score-lbl">Toplam Net</span>
-                                <span class="score-val">${ex.toplam_net.toFixed(2)}</span>
-                            </div>
-                            <div class="exam-score" style="text-align: right">
-                                <span class="score-lbl">P10 Puanı</span>
-                                <span class="score-val" style="color: #10b981">${ex.kpss_puan.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            cont.innerHTML = html;
-        }
+                    </div>`;
+                });
+                document.getElementById('history-list').innerHTML = h || '<p style="color:var(--text-muted)">Deneme bulunamadı.</p>';
+            },
 
-        async function deleteExam(id) {
-            if(!confirm("Bu denemeyi silmek istediğinize emin misiniz?")) return;
-            
-            document.getElementById(`ex-${id}`).style.opacity = '0.5';
-            await sb.from('kpss_denemeler').delete().eq('id', id);
-            
-            userExams = userExams.filter(e => e.id !== id);
-            renderHistory();
-            showToast("Deneme silindi.");
-        }
+            async del(id) {
+                if(!confirm("Silinsin mi?")) return;
+                await sb.from('kpss_denemeler').delete().eq('id', id);
+                this.exams = this.exams.filter(x => x.id !== id); this.renderHistory(); this.toast("Silindi!");
+            },
 
-        // Analysis UI
-        function renderAnalysis() {
-            if(userExams.length === 0) {
-                document.getElementById('stat-last-net').innerText = '-';
-                document.getElementById('stat-last-score').innerText = '-';
-                document.getElementById('stat-max-net').innerText = '-';
-                document.getElementById('stat-avg-net').innerText = '-';
-                document.getElementById('chart-avg-subjects').innerHTML = '<div class="empty-state">Veri yok</div>';
-                document.getElementById('chart-trend').innerHTML = '<div class="empty-state">Veri yok</div>';
-                return;
+            renderAnalysis() {
+                if(!this.exams.length) return;
+                const last = this.exams[this.exams.length-1], max = Math.max(...this.exams.map(e=>e.toplam_net)), avg = this.exams.reduce((a,b)=>a+b.toplam_net,0)/this.exams.length;
+                document.getElementById('a-last').innerText = last.toplam_net.toFixed(2);
+                document.getElementById('a-puan').innerText = last.kpss_puan.toFixed(2);
+                document.getElementById('a-max').innerText = max.toFixed(2);
+                document.getElementById('a-avg').innerText = avg.toFixed(2);
+                let bars = '';
+                subjects.forEach(s => {
+                    let sAvg = this.exams.reduce((a,b)=>a+b[`${s.id}_net`],0)/this.exams.length;
+                    bars += `<div class="hbar"><div class="hbar-label">${s.n}</div><div class="hbar-track"><div class="hbar-fill" style="width:${(sAvg/s.q)*100}%; background:${s.c}"></div></div><div style="font-size:12px; font-weight:600">${sAvg.toFixed(1)}</div></div>`;
+                });
+                document.getElementById('a-bars').innerHTML = bars;
             }
+        };
 
-            const latest = userExams[userExams.length - 1];
-            let maxNet = 0;
-            let totalNetSum = 0;
-
-            const subjectTotals = {};
-            subjects.forEach(s => subjectTotals[s.id] = 0);
-
-            userExams.forEach(ex => {
-                if(ex.toplam_net > maxNet) maxNet = ex.toplam_net;
-                totalNetSum += ex.toplam_net;
-                subjects.forEach(s => subjectTotals[s.id] += ex[`${s.id}_net`]);
-            });
-
-            document.getElementById('stat-last-net').innerText = latest.toplam_net.toFixed(2);
-            document.getElementById('stat-last-score').innerText = latest.kpss_puan.toFixed(2);
-            document.getElementById('stat-max-net').innerText = maxNet.toFixed(2);
-            document.getElementById('stat-avg-net').innerText = (totalNetSum / userExams.length).toFixed(2);
-
-            // Avg Subjects Chart
-            let hbarHtml = '';
-            subjects.forEach(s => {
-                const avg = subjectTotals[s.id] / userExams.length;
-                const pct = (avg / s.qs) * 100;
-                hbarHtml += `
-                    <div class="hbar-row">
-                        <div class="hbar-label">${s.name}</div>
-                        <div class="hbar-track">
-                            <div class="hbar-fill" style="width: ${pct}%; background: ${s.color}"></div>
-                        </div>
-                        <div class="hbar-val">${avg.toFixed(1)}</div>
-                    </div>
-                `;
-            });
-            document.getElementById('chart-avg-subjects').innerHTML = hbarHtml;
-
-            // Trend Chart (Last 6)
-            const trendData = userExams.slice(-6);
-            let tMax = Math.max(...trendData.map(d => d.toplam_net), 10);
-            let vbarHtml = '';
-            
-            trendData.forEach(d => {
-                const hPct = (d.toplam_net / tMax) * 100;
-                vbarHtml += `
-                    <div class="vbar-col">
-                        <div class="vbar-track">
-                            <div class="vbar-fill" style="height: ${hPct}%">
-                                <span>${d.toplam_net.toFixed(0)}</span>
-                            </div>
-                        </div>
-                        <div class="vbar-label">${d.tarih_kisa.substring(0,5)}</div>
-                    </div>
-                `;
-            });
-            document.getElementById('chart-trend').innerHTML = vbarHtml;
-        }
-
-        // Run
-        init();
+        app.init();
     </script>
 </body>
 </html>
