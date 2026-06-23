@@ -1,1 +1,68 @@
+/* --- TEMA DEĞİŞKENLERİ (Karanlık ve Aydınlık Mod) --- */
+:root[data-theme="dark"] {
+    --bg-main: #050507;
+    --bg-panel: #0f0f13;
+    --bg-glass: rgba(20, 20, 25, 0.7);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: #8b92a5;
+    --brand-color: #8b5cf6;
+    --brand-hover: #7c3aed;
+    --input-bg: rgba(0, 0, 0, 0.4);
+}
 
+:root[data-theme="light"] {
+    --bg-main: #f1f5f9;
+    --bg-panel: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.8);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --brand-color: #6d28d9;
+    --brand-hover: #5b21b6;
+    --input-bg: #f8fafc;
+}
+
+/* --- GENEL SIFIRLAMA VE YAPI --- */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+body { background-color: var(--bg-main); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; }
+
+button { cursor: pointer; border: none; background: transparent; color: inherit; outline: none; }
+input { width: 100%; padding: 16px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 12px; font-size: 15px; outline: none; transition: 0.2s; }
+input:focus { border-color: var(--brand-color); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+
+/* --- BUTONLAR --- */
+.btn-primary { background: var(--brand-color); color: #fff; padding: 16px 24px; border-radius: 12px; font-weight: 700; width: 100%; transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-primary:hover { background: var(--brand-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); }
+.btn-secondary { width: 100%; padding: 12px; background: var(--border-color); border-radius: 8px; font-weight: 600; margin-bottom: 15px; }
+.btn-secondary:hover { background: var(--brand-color); color: #fff; }
+.text-danger { color: #ef4444; font-weight: 700; }
+
+/* --- GİRİŞ EKRANI --- */
+#login-view { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+#login-view.active { display: flex; }
+.login-box { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 50px 40px; border-radius: 24px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); text-align: center; }
+.login-box h2 { font-size: 32px; font-weight: 800; margin-bottom: 30px; }
+.login-box h2 span { color: var(--brand-color); }
+.input-group { margin-bottom: 20px; }
+
+/* --- ANA YAPI (SİDEBAR & İÇERİK) --- */
+#app-layout { display: flex; width: 100%; height: 100%; }
+.sidebar { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 30px 20px; }
+.logo { font-size: 22px; font-weight: 800; margin-bottom: 40px; color: var(--brand-color); }
+.nav-menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.nav-item { padding: 14px 20px; text-align: left; border-radius: 12px; font-weight: 600; color: var(--text-secondary); }
+.nav-item:hover { background: var(--border-color); color: var(--text-primary); }
+.nav-item.active { background: rgba(139, 92, 246, 0.1); color: var(--brand-color); border-left: 4px solid var(--brand-color); }
+
+.sidebar-bottom { padding-top: 20px; border-top: 1px solid var(--border-color); }
+.user-info { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
+
+.content-area { flex: 1; padding: 50px 60px; overflow-y: auto; background: var(--bg-main); }
+.page { display: none; animation: fadeUp 0.4s ease; }
+.page.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- TOAST BİLDİRİM --- */
+#toast { position: fixed; bottom: 30px; right: 30px; background: var(--bg-panel); border-left: 4px solid var(--brand-color); padding: 16px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateX(150%); transition: 0.3s; z-index: 1000; }
+#toast.show { transform: translateX(0); }
